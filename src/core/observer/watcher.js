@@ -42,13 +42,14 @@ export default class Watcher {
   before: ?Function;
   getter: Function;
   value: any;
+  // 上面就是声明的一些属性
 
   constructor (
     vm: Component,
     expOrFn: string | Function,
     cb: Function,
     options?: ?Object,
-    isRenderWatcher?: boolean
+    isRenderWatcher?: boolean  // 是否是renderWatcher
   ) {
     this.vm = vm
     if (isRenderWatcher) {
@@ -126,6 +127,7 @@ export default class Watcher {
   /**
    * Add a dependency to this directive.
    */
+  // 通过 Dep.target.addDep(this) 调用
   addDep (dep: Dep) {
     const id = dep.id
     if (!this.newDepIds.has(id)) {

@@ -213,13 +213,19 @@ export function defineReactive (
   }
 
   // cater for pre-defined getter/setters
-  const getter = property && property.get
+  const getter = property && property.get // 获取 - 描述符对象中的get
   const setter = property && property.set
   if ((!getter || setter) && arguments.length === 2) {
+    // 如果 getter 不存在，或者 setter存在
+    // 并且 defineReactive 中传入的参数有两个时候，即 defineReactive(obj, keys[i])
     val = obj[key]
+    // 因为如果只有两个参数时，val是undefined，然后在这里重新赋值成 obj[key]
   }
 
   let childOb = !shallow && observe(val)
+  // 继续观测对象的每一项的value值,如果还是对象就继续观察 添加响应Object.defineProperty
+
+
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,

@@ -49,6 +49,7 @@
 
 
 ## (二) 对比 vue 和 react-redux 源码中对 plainObject 纯对象的判断
+
 ### 前置知识
 - 我原型链的文章 https://juejin.cn/post/6844904048873701389/#heading-21
 ```
@@ -87,7 +88,7 @@ Constructor.prototype.__proto__ === Object.prototype 所有 函数的prototype �
   - 因为：`const obj = {}`
   - 所以：`Object.getPrototypeOf(obj) === Object.prototype` // true
 ```
-react-redux 中如何利用 ( 原型链 ) 来判断是否是 plainObject 
+react-redux 中如何利用 ( 原型链 ) 来判断是否是 plainObject
 -------
 
 /**
@@ -98,11 +99,11 @@ react-redux 中如何利用 ( 原型链 ) 来判断是否是 plainObject
   if (typeof obj !== 'object' || obj === null) return false
 
   let proto = Object.getPrototypeOf(obj)
- 
-  if (proto === null) return true // 说明是通过 Object.creare(null) 创建，生成的就是一个plainObject
-  
+
+  if (proto === null) return true // 说明是通过 Object.create(null) 创建，生成的就是一个plainObject
+
   let baseProto = proto
-  
+
   while (Object.getPrototypeOf(baseProto) !== null) {
     // 如果：( 参数对象 ) 的原型对象不是 ( null )，即满足while的条件
     // 那么：就一层层往上赋值成原型对象，直到参数对象的原型对象是null
@@ -110,11 +111,11 @@ react-redux 中如何利用 ( 原型链 ) 来判断是否是 plainObject
     // 所以：baseProto === Object.prototype 就终止寻找
     baseProto = Object.getPrototypeOf(baseProto)
   }
-  
+
   // 2. 原型链第一个和最后一个比较
-  // 因为：plainObject对象的 obj.__proto__ === Object.protype
+  // 因为：plainObject对象的 obj.__proto__ === Object.prototype
   // 所以：是 plainObject 返回 true
-  
+
   // 3
   // 对比一下
   // function 的情况
@@ -122,7 +123,7 @@ react-redux 中如何利用 ( 原型链 ) 来判断是否是 plainObject
   // proto 是 Function.prototype
   // baseProto 是 Object.prototype
   // 所以：当参数传入的是一个function的时，返回的是 false，说明不是一个纯对象
-  
+
   // 4
   // 对比一下
   // array 的情况
@@ -132,7 +133,7 @@ react-redux 中如何利用 ( 原型链 ) 来判断是否是 plainObject
   // - Object.getPrototypeOf([]) === Array.prototype
   // - Object.getPrototypeOf(Array.prototype) === Object.prototype // 任何函数的prototype 都是 Object.prototype 的实例
   // 所以：当参数传入的是一个数组的时，返回的是 false，说明不是一个纯对象
-  
+
   return proto === baseProto
 }
 ```
