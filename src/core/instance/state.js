@@ -29,13 +29,21 @@ import {
   invokeWithErrorHandling
 } from '../util/index'
 
+// 公用的属性
+// Object.defineProperty(obj, props, descriptor)
+// - 参数
+//  - descriptor 表示属性描述符
+//    - 数据描述符对象 value writeable configurable enumerable
+//    - 存取描述符对象 get set
 const sharedPropertyDefinition = {
-  enumerable: true,
-  configurable: true,
+  enumerable: true, // 属性可枚举，枚举的属性可以被 Object.keys() Object.getOwnPropertyNames() for...in 遍历到
+  configurable: true, // 表示可以修改 descriptor 属性描述对象，同时该属性是可删除的
   get: noop,
   set: noop
 }
 
+// proxy
+// proxy(vm, `_data`, key)
 export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
@@ -43,22 +51,41 @@ export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.set = function proxySetter (val) {
     this[sourceKey][key] = val
   }
+  // 1. 重写了 get set 函数
+  // 2. 整个逻辑表示：给 vm 实力添加 key 属性
+  // 4. 重写了get和set之后
+  //    - vm.key === vm._data.key
+  //    - get和set中的this，指向的是vm实例，因为是通过vm去访问和修改的
   Object.defineProperty(target, key, sharedPropertyDefinition)
+  // vm[key] = vm._data[key]
+  // 因为： vm._data = vm.$options.data
+  // 所以：vm[key] = vm._data[key] =  vm.$options.data[key]
 }
 
+
+// initState
 export function initState (vm: Component) {
   vm._watchers = []
-  const opts = vm.$options
-  if (opts.props) initProps(vm, opts.props)
-  if (opts.methods) initMethods(vm, opts.methods)
+  const opts = vm.$options // 获取vm中掺入的配置对象 options
+  if (opts.props) initProps(vm, opts.props) // ------------ initProps
+  if (opts.methods) initMethods(vm, opts.methods) // ------ initMethods
   if (opts.data) {
     initData(vm)
+    // ---------------------------------------------------- initData
   } else {
+    // data 不存在，传入空对象作为初始化data -> rootData
     observe(vm._data = {}, true /* asRootData */)
   }
-  if (opts.computed) initComputed(vm, opts.computed)
+  if (opts.computed) initComputed(vm, opts.computed) // --- initComputed
   if (opts.watch && opts.watch !== nativeWatch) {
-    initWatch(vm, opts.watch)
+    initWatch(vm, opts.watch) // -------------------------- initWatch
+    // 1
+    // watch存在，并且不是原生的对象上的watch属性，就初始化 watch
+    // 2
+    // watcher 一共分为三种
+    // computed watcher
+    // render watcher
+    // user watcher
   }
 }
 
@@ -110,12 +137,37 @@ function initProps (vm: Component, propsOptions: Object) {
   toggleObserving(true)
 }
 
+// initData
 function initData (vm: Component) {
   let data = vm.$options.data
+  // 1
+  // data
+  // 获取传入的 options 对象上的 data 属性
+  // 注意：这里的 vm.$options 在不是组件的情况下，是合并后的 options
+
+  // 2
+  // vm -> 表示的 vue 的实例
+  // vm.$options -> 就是传入Vue或组件实例的 ( 配置对象 )
+  // vm.$data.a === vm.a -> vue会将vm中的options中的data中的属性，直接挂在到 vm 上，所以在vue组件中你可以使用 this.a 直接访问到 vm.$data.a
+  // vm上还有很多带 $ 的属性，比如：
+  // - vm.$data
+  // - vm.$props
+  // - vm.$el ...
+
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
     : data || {}
+  // vm.$options.data === vm._data === vm.$data
+
   if (!isPlainObject(data)) {
+    // 判断是否是 plainObject 纯对象
+    // 1
+    // 什么是纯对象？
+    // - plainObject是通过 ( 对象字面量方式声明{} ) 或者通过 ( Object.create() ) 生成的对象
+    // - const obj = {}
+    // - const obj = Object.create()
+    // 2
+    // 详见 README.md 文件 二
     data = {}
     process.env.NODE_ENV !== 'production' && warn(
       'data functions should return an object:\n' +
@@ -131,7 +183,12 @@ function initData (vm: Component) {
   while (i--) {
     const key = keys[i]
     if (process.env.NODE_ENV !== 'production') {
+      // hasOwn 函数的定义
+      // export function hasOwn (obj: Object | Array<*>, key: string): boolean {
+      //   return Object.prototype.hasOwnProperty.call(obj, key)
+      // }
       if (methods && hasOwn(methods, key)) {
+        // methods 对象中的 ( 方法名 ) 不能和 ( data中的key ) 同名
         warn(
           `Method "${key}" has already been defined as a data property.`,
           vm
@@ -139,16 +196,19 @@ function initData (vm: Component) {
       }
     }
     if (props && hasOwn(props, key)) {
+      // ( data中的key ) 不能和 ( props中的key ) 同名
       process.env.NODE_ENV !== 'production' && warn(
         `The data property "${key}" is already declared as a prop. ` +
         `Use prop default value instead.`,
         vm
       )
     } else if (!isReserved(key)) {
+      // props，data，methods中没有同名的key，就执行代理 proxy 函数
       proxy(vm, `_data`, key)
     }
   }
   // observe data
+  // data 的响应式
   observe(data, true /* asRootData */)
 }
 

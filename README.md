@@ -47,5 +47,95 @@
   - 再在浏览器中打开 index.html，再F12调试，再看到Sources面板，发现多出了 src 文件，就是整个vue的源文件了
   - 现在就可以断点调试vue2的源码了
 
+
+## (二) 对比 vue 和 react-redux 源码中对 plainObject 纯对象的判断
+### 前置知识
+- 我原型链的文章 https://juejin.cn/post/6844904048873701389/#heading-21
+```
+1
+typeof
+typeof 返回的数据类型，一共有 7 种
+- number string boolean undefined symbol
+- object function
+
+2
+原型链
+2.1 函数
+- 所有的 ( 函数 )，都是大写的 ( Function.prototype ) 的实例
+- 包括自身，即 Function.__proto__ === Function.prototype
+2.2 函数的prototype
+- 所有 ( 函数的prototype )，都是大写的 ( Object.prototype ) 的实例
+2.3 案例
+- 2.3.1
+Function.__proto__ === Function.prototype 所有的函数都是Function.prototype对象的实例
+- 2.3.2
+function Constructor(){}
+Constructor.__proto__ === Function.prototype 所有的函数都是Function.prototype对象的实例
+Constructor.prototype.__proto__ === Object.prototype 所有 函数的prototype 都是 Object.prototype 的实例
+```
+
+### (1) 什么是 plainObject
+- 定义：通过对象字面量方式定义的对象{}和通过Object.create()定义的对象就是plainObject
+- const obj = {}
+- const obj = Object.create()
+
+### (2) react-redux 对 plainObject 的utils函数的定义
+- 分析1
+  - 因为：`const obj = Object.create(null)`
+  - 所以：`Object.getPrototypeOf(obj) === null` // true
+- 分析2
+  - 因为：`const obj = {}`
+  - 所以：`Object.getPrototypeOf(obj) === Object.prototype` // true
+```
+react-redux 中如何利用 ( 原型链 ) 来判断是否是 plainObject 
+-------
+
+/**
+ * @param {any} obj The object to inspect.
+ * @returns {boolean} True if the argument appears to be a plain object.
+ */
+ export default function isPlainObject(obj) {
+  if (typeof obj !== 'object' || obj === null) return false
+
+  let proto = Object.getPrototypeOf(obj)
+ 
+  if (proto === null) return true // 说明是通过 Object.creare(null) 创建，生成的就是一个plainObject
+  
+  let baseProto = proto
+  
+  while (Object.getPrototypeOf(baseProto) !== null) {
+    // 如果：( 参数对象 ) 的原型对象不是 ( null )，即满足while的条件
+    // 那么：就一层层往上赋值成原型对象，直到参数对象的原型对象是null
+    // 而：Object.prototype === null
+    // 所以：baseProto === Object.prototype 就终止寻找
+    baseProto = Object.getPrototypeOf(baseProto)
+  }
+  
+  // 2. 原型链第一个和最后一个比较
+  // 因为：plainObject对象的 obj.__proto__ === Object.protype
+  // 所以：是 plainObject 返回 true
+  
+  // 3
+  // 对比一下
+  // function 的情况
+  // 假设我们这里obj是一个 function
+  // proto 是 Function.prototype
+  // baseProto 是 Object.prototype
+  // 所以：当参数传入的是一个function的时，返回的是 false，说明不是一个纯对象
+  
+  // 4
+  // 对比一下
+  // array 的情况
+  // 假设我们这里obj是一个 array
+  // proto 是 Array.prototype
+  // baseProto 是 Object.prototype
+  // - Object.getPrototypeOf([]) === Array.prototype
+  // - Object.getPrototypeOf(Array.prototype) === Object.prototype // 任何函数的prototype 都是 Object.prototype 的实例
+  // 所以：当参数传入的是一个数组的时，返回的是 false，说明不是一个纯对象
+  
+  return proto === baseProto
+}
+```
+
 # 资料
 - 源码调试 https://juejin.cn/post/6883002751769378829
