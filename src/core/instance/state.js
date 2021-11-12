@@ -44,6 +44,10 @@ const sharedPropertyDefinition = {
 
 // proxy
 // proxy(vm, `_data`, key)
+// 主要作用
+// - proxy函数的主要作用是
+//  - 做了一层代理
+//  - this.name === vm.name === vm._data.name === vm.$options.data.name === vm.$data.name
 export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
@@ -57,9 +61,9 @@ export function proxy (target: Object, sourceKey: string, key: string) {
   //    - vm.key === vm._data.key
   //    - get和set中的this，指向的是vm实例，因为是通过vm去访问和修改的
   Object.defineProperty(target, key, sharedPropertyDefinition)
-  // vm[key] = vm._data[key]
+  // vm[key] === vm._data[key]
   // 因为： vm._data = vm.$options.data
-  // 所以：vm[key] = vm._data[key] =  vm.$options.data[key]
+  // 所以：vm[key] === vm._data[key] === vm.$data[key] === vm.$options.data[key]
 }
 
 

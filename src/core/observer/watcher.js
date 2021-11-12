@@ -127,7 +127,14 @@ export default class Watcher {
   /**
    * Add a dependency to this directive.
    */
-  // 通过 Dep.target.addDep(this) 调用
+  // 1
+  // 调用过程
+  // 1. 通过 Dep.target.addDep(this) ---> 表示调用watcher对象上的addDep方法，参数是 dep 实例
+  // 2. addDep() 方法的作用 -------------> 调用dep对象上的addSub方法，参数是 watcher 实例
+  // 3. addSub() 方法的作用 -------------> 向dep对象上的subs数组中，添加watcher
+  // 总结
+  // - watcher.addDep(dep)
+  // - dep.addSub(watcher)
   addDep (dep: Dep) {
     const id = dep.id
     if (!this.newDepIds.has(id)) {
