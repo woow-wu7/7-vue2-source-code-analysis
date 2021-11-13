@@ -172,6 +172,7 @@ function initData (vm: Component) {
   //      - 当一个组件被定义，data 必须声明为返回一个初始数据对象的函数，因为组件可能被用来创建多个实例
   //      - 如果data是对象：则所有实例都会 ( 共享引用 ) ( 同一个data对象 )
   //      - 如果data是函数：则每次新建实例，都会调用data函数，生成新的data对象，是不同的地址，独立不影响
+  // - data不存在时，做了熔断处理，将 {} 赋值给 data
 
   if (!isPlainObject(data)) {
     // 判断是否是 plainObject 纯对象
@@ -187,7 +188,9 @@ function initData (vm: Component) {
       'data functions should return an object:\n' +
       'https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function',
       vm
+      // data函数必须返回一个对象
     )
+    // 该if语句表示：如果data不是一个纯对象，先把data赋值为空对象，然后在开发环境中抛出警告
   }
   // proxy data on instance
   const keys = Object.keys(data)
@@ -217,7 +220,17 @@ function initData (vm: Component) {
         vm
       )
     } else if (!isReserved(key)) {
-      // props，data，methods中没有同名的key，就执行代理 proxy 函数
+      // 1
+      // isReserved
+      // reserve 是保留字的意思
+      // export function isReserved (str: string): boolean {
+      //   const c = (str + '').charCodeAt(0)
+      //   return c === 0x24 || c === 0x5F
+      // }
+      // Check if a string starts with $ or _
+      // 2
+      // props，data，methods中没有同名的key，并且该key不是vue保留字，就执行代理 proxy 函数
+      // vue 中 $ 和 _ 是保留字
       proxy(vm, `_data`, key)
     }
   }
@@ -226,16 +239,32 @@ function initData (vm: Component) {
   observe(data, true /* asRootData */)
 }
 
+// getData
 export function getData (data: Function, vm: Component): any {
   // #7573 disable dep collection when invoking data getters
   pushTarget()
+  // pushTarget
+  // 1
+  // pushTarget 是 Dep 类中的属性
+  // export function pushTarget (target: ?Watcher) {
+  //   targetStack.push(target)
+  //   Dep.target = target
+  // }
+  // 2
+  // 参数问题
+  // 注意：
+  // - 这里 pushTarget() 是没有传入参数的
+  // - 所以 Dep.target = undefined，即表示正在计算的watcher不存在
   try {
     return data.call(vm, vm)
+    // data.call(vm, vm)
+    // 第一个参数：vm，因为通过call调用，所以第一个参数表示data函数中的this绑定在 data 对象上
+    // 第二个参数：vm，是传入data函数中的数据，而我们业务方使用的时候，是不需要在传任何参数的
   } catch (e) {
     handleError(e, vm, `data()`)
     return {}
   } finally {
-    popTarget()
+    popTarget() // target出队列，targetStack = []，因为上面最开始时进入了队列
   }
 }
 

@@ -169,6 +169,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
     // data存在 __ob__ 属性 并且 value.__ob__是一个observer对象
     // 即已经观测过了, 直接赋值
+    // 观察过 -------> __ob__属性存在，则直接赋值给ob
     ob = value.__ob__
   } else if (
     // 未观察过
