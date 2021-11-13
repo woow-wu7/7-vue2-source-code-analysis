@@ -162,6 +162,16 @@ function initData (vm: Component) {
     ? getData(data, vm)
     : data || {}
   // vm.$options.data === vm._data === vm.$data
+  // 3
+  // data
+  // data有两种情况
+  // - data是一个 对象
+  // - data是一个 函数
+  //    - data 是函数时，就执行 getData(data, vm)
+  //    - data是一个函数的好处：
+  //      - 当一个组件被定义，data 必须声明为返回一个初始数据对象的函数，因为组件可能被用来创建多个实例
+  //      - 如果data是对象：则所有实例都会 ( 共享引用 ) ( 同一个data对象 )
+  //      - 如果data是函数：则每次新建实例，都会调用data函数，生成新的data对象，是不同的地址，独立不影响
 
   if (!isPlainObject(data)) {
     // 判断是否是 plainObject 纯对象
