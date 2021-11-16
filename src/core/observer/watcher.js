@@ -65,6 +65,7 @@ export default class Watcher {
       this.before = options.before
     } else {
       this.deep = this.user = this.lazy = this.sync = false
+      // options 不存在时，默认都设置为 false
     }
     this.cb = cb
     this.id = ++uid // uid for batching
@@ -174,8 +175,8 @@ export default class Watcher {
   update () {
     /* istanbul ignore else */
     if (this.lazy) {
-      this.dirty = true
-    } else if (this.sync) {
+      this.dirty = true // this.dirty = this.lazy
+    } else if (this.sync) { // watch
       this.run()
     } else {
       queueWatcher(this)
@@ -185,6 +186,7 @@ export default class Watcher {
   /**
    * Scheduler job interface.
    * Will be called by the scheduler.
+   * 在调度中被回调调用
    */
   run () {
     if (this.active) {

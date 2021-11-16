@@ -250,6 +250,7 @@ export function defineReactive (
   // 继续观测对象的每一项的value值,如果还是对象就继续观察 添加响应Object.defineProperty
   // shallow：是浅的意思，表示不是浅观察的的话
 
+  // 依赖收集 和 派发更新
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
@@ -261,6 +262,15 @@ export function defineReactive (
           childOb.dep.depend()
           if (Array.isArray(value)) {
             dependArray(value)
+            // function dependArray (value: Array<any>) {
+            //   for (let e, i = 0, l = value.length; i < l; i++) {
+            //     e = value[i]
+            //     e && e.__ob__ && e.__ob__.dep.depend()
+            //     if (Array.isArray(e)) {
+            //       dependArray(e)
+            //     }
+            //   }
+            // }
           }
         }
       }

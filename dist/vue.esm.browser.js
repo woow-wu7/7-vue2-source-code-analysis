@@ -11972,6 +11972,7 @@ const idToTemplate = cached(id => {
   return el && el.innerHTML
 });
 
+// mount
 const mount = Vue.prototype.$mount;
 Vue.prototype.$mount = function (
   el,
