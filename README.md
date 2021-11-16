@@ -78,6 +78,14 @@ Function.__proto__ === Function.prototype 所有的函数都是Function.prototyp
 function Constructor(){}
 Constructor.__proto__ === Function.prototype 所有的函数都是Function.prototype对象的实例
 Constructor.prototype.__proto__ === Object.prototype 所有 函数的prototype 都是 Object.prototype 的实例
+
+3
+Object.is 和 === 的区别
+Object.is 用来判断两个值是否严格相等
++0 === -0 // true
+Object.is(+0, -0) // false
+NaN === NaN // false
+Object.is(NaN, NaN) // true
 ```
 
 ### (1) 什么是 plainObject
@@ -152,5 +160,6 @@ react-redux 中如何利用 ( 原型链 ) 来判断是否是 plainObject
   - 详细
     - 如果data是对象：则所有实例都会 ( 共享引用 ) ( 同一个data对象 )
     - 如果data是函数：则每次新建实例，都会调用data函数，生成新的data对象，是不同的地址，独立不影响
+
 # 资料
 - 源码调试 https://juejin.cn/post/6883002751769378829
