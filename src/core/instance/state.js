@@ -67,7 +67,8 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 }
 
 
-// initState
+// initState 初始化state
+// initState -> initData
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options // 获取vm中掺入的配置对象 options
@@ -182,6 +183,11 @@ function initData (vm: Component) {
     // - const obj = {}
     // - const obj = Object.create()
     // 2
+    // isPlainObject 的函数定义如下
+    // export function isPlainObject (obj: any): boolean {
+    //   return  Object.prototype.toString.call(obj) === '[object Object]'
+    // }
+    // 3
     // 详见 README.md 文件 二
     data = {}
     process.env.NODE_ENV !== 'production' && warn(
@@ -193,6 +199,9 @@ function initData (vm: Component) {
     // 该if语句表示：如果data不是一个纯对象，先把data赋值为空对象，然后在开发环境中抛出警告
   }
   // proxy data on instance
+  // 1. 判断 ( data ) 中的属性不能和 ( props, methods ) 中的属性 key 同名
+  // 2. 判断是不是 reserve 保留字
+  // 3. 通过12对data做一层代理
   const keys = Object.keys(data)
   const props = vm.$options.props
   const methods = vm.$options.methods
@@ -231,11 +240,14 @@ function initData (vm: Component) {
       // 2
       // props，data，methods中没有同名的key，并且该key不是vue保留字，就执行代理 proxy 函数
       // vue 中 $ 和 _ 是保留字
+      // 3
+      // proxy 的作用：vm[key] = vm._data'[key]
       proxy(vm, `_data`, key)
     }
   }
   // observe data
   // data 的响应式
+  // observer是有返回值的，返回的是一个ob对象，即 observer 对象实例
   observe(data, true /* asRootData */)
 }
 

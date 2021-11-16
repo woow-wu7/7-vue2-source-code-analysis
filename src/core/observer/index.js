@@ -17,12 +17,15 @@ import {
 } from '../util/index'
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
+// arrayMethods = Object.create(Array.prototype)
+// 等价于 const arrayKeys = Object.getOwnPropertyNames(Object.create(Array.prototype))
 
 /**
  * In some cases we may want to disable observation inside a component's
  * update computation.
+ * 有些时候，我们在组件更新计算时，是需要禁止观察的
  */
-export let shouldObserve: boolean = true
+export let shouldObserve: boolean = true // 标志位
 
 export function toggleObserving (value: boolean) {
   shouldObserve = value
@@ -59,7 +62,13 @@ export class Observer {
     // 2
     // def的作用
     // - 给 data 添加 __ob__ 属性，值是 observer 实例
-    // - data.__ob__ = observer
+    // - data.__ob__ = observer实例
+    // 3
+    // 这里def的第四个参数不存在，说明 __ob__ 属性是不可枚举的，所以不能被
+    // - Object.keys() 遍历自身属性 + 可枚举属性
+    // - Object.getOwnPropertyNames() 遍历 自身属性 + 可枚举属性 + 不可枚举属性
+    // - for...in 遍历自身 + 继承的属性
+    // - key in Object 自身 + 继承的属性
     if (Array.isArray(value)) {
       if (hasProto) {
         // 1
@@ -77,9 +86,8 @@ export class Observer {
         //   target.__proto__ = src
         // }
         // 3.1
-        // const arrayProto = Array.prototype
-        // export const arrayMethods = Object.create(arrayProto)
-        // 上面的 3.1 表示：创建一个 plainArray 实例
+        // const arrayMethods = Object.create(Array.prototype)
+        // 这里需要进入源文件中看，因为重写了7中数组方法，并且绑定到了
         // 3.2
         // const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
         // - 注意：Object.getOwnPropertyNames() 获取 ( 自身属性 + 可枚举属性 + 不可枚举属性 )
@@ -90,13 +98,22 @@ export class Observer {
         //     def(target, key, src[key])
         //   }
         // }
-        protoAugment(value, arrayMethods)
+        protoAugment(value, arrayMethods) // ------------------ 如果是数组并且__proto__存在，则将 value.__pro__ =  Object.create(Array.prototype)
+        // protoAugment(value, arrayMethods) 的作用就是：让value继承了重写的7中数组方法的数组
       } else {
         // 不存在 {}.__proto__
-        copyAugment(value, arrayMethods, arrayKeys)
+        copyAugment(value, arrayMethods, arrayKeys) // -------- 如果是数组并且不存在__proto__
       }
+
+      // 观测 - 数组
       this.observeArray(value)
+      // observeArray (items: Array<any>) {
+      //   for (let i = 0, l = items.length; i < l; i++) {
+      //     observe(items[i]) // 观测数组每个成员，在observe中会做 ( 依赖收集 ) 和 ( 派发更新 ) 的流程
+      //   }
+      // }
     } else {
+      // 观测 - 对象
       // value 不是数组，则 观测对象
       // - 说明 value 是一个对象
       this.walk(value)
@@ -111,7 +128,7 @@ export class Observer {
    * // walk 是遍历所有属性，并转换 getter 和 setter 函数
    */
   walk (obj: Object) {
-    const keys = Object.keys(obj)
+    const keys = Object.keys(obj) // 遍历自身属性 + 可枚举属性
     for (let i = 0; i < keys.length; i++) {
       defineReactive(obj, keys[i])
     }
@@ -119,10 +136,11 @@ export class Observer {
 
   /**
    * Observe a list of Array items.
+   * 观测数组
    */
   observeArray (items: Array<any>) {
     for (let i = 0, l = items.length; i < l; i++) {
-      observe(items[i])
+      observe(items[i]) // 观测数组每个成员，在observe中会做 ( 依赖收集 ) 和 ( 派发更新 ) 的流程
     }
   }
 }
@@ -160,19 +178,24 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * 如果value已经存在，就返回存在的 observer
  */
 // observe(data, true /* asRootData */)
+// 返回：ob对象 -> Observer | void
 export function observe (value: any, asRootData: ?boolean): Observer | void {
   if (!isObject(value) || value instanceof VNode) {
-    // 如果 value 不是一个对象 或者 是一个 VNode，则直接返回
+    // 如果 value 不是一个 ( 对象 和 数组 ) 或者 是一个 VNode，则直接返回
     return
+    // export function isObject (obj: mixed): boolean %checks {
+    //   return obj !== null && typeof obj === 'object'
+    //   其实就是 object 和 array
+    // }
   }
   let ob: Observer | void
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
     // data存在 __ob__ 属性 并且 value.__ob__是一个observer对象
     // 即已经观测过了, 直接赋值
-    // 观察过 -------> __ob__属性存在，则直接赋值给ob
+    // 观察过 -------> __ob__属性存在，则直接复用
     ob = value.__ob__
   } else if (
-    // 未观察过
+    // 未观察过，则生成新的 ob
     shouldObserve &&
     !isServerRendering() &&
     (Array.isArray(value) || isPlainObject(value)) &&
@@ -225,7 +248,7 @@ export function defineReactive (
 
   let childOb = !shallow && observe(val)
   // 继续观测对象的每一项的value值,如果还是对象就继续观察 添加响应Object.defineProperty
-
+  // shallow：是浅的意思，表示不是浅观察的的话
 
   Object.defineProperty(obj, key, {
     enumerable: true,
