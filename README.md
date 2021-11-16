@@ -86,6 +86,7 @@ Object.is 用来判断两个值是否严格相等
 Object.is(+0, -0) // false
 NaN === NaN // false
 Object.is(NaN, NaN) // true
+Object.is({}, {}) // false，因为不是同一个引用
 ```
 
 ### (1) 什么是 plainObject
