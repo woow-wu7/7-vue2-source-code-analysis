@@ -138,12 +138,14 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
+// mountComponent
+// Vue.prototype.$mount = (el, hydrating) => mountComponent(this, el, hydrating)
 export function mountComponent (
   vm: Component,
   el: ?Element,
   hydrating?: boolean
 ): Component {
-  vm.$el = el
+  vm.$el = el // vm.$el 赋值
   if (!vm.$options.render) {
     vm.$options.render = createEmptyVNode
     if (process.env.NODE_ENV !== 'production') {

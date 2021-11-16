@@ -33,14 +33,36 @@ extend(Vue.options.components, platformComponents)
 // install platform patch function
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
+// runtime 版本
 // public mount method
 Vue.prototype.$mount = function (
-  el?: string | Element,
+  el?: string | Element, // el可能是字符串，表示css选择器；也可能是一个元素节点
   hydrating?: boolean
 ): Component {
   el = el && inBrowser ? query(el) : undefined
+  // query(el) 的作用就是根据el的不同情况，返回对应的元素节点
   return mountComponent(this, el, hydrating)
 }
+// 1
+// inBrowser
+// const inBrowser = typeof window !== 'undefined'
+
+// 2
+// query()
+// export function query (el: string | Element): Element {
+//   if (typeof el === 'string') {
+//     const selected = document.querySelector(el)
+//     if (!selected) {
+//       process.env.NODE_ENV !== 'production' && warn(
+//         'Cannot find element: ' + el
+//       )
+//       return document.createElement('div')
+//     }
+//     return selected
+//   } else {
+//     return el
+//   }
+// }
 
 // devtools global hook
 /* istanbul ignore next */

@@ -14,24 +14,28 @@ const idToTemplate = cached(id => {
   return el && el.innerHTML
 })
 
+// runtime + compiler 版本
 const mount = Vue.prototype.$mount
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
   el = el && query(el)
+  // query(el) 的作用就是根据el的不同情况，返回对应的元素节点
 
   /* istanbul ignore if */
   if (el === document.body || el === document.documentElement) {
     process.env.NODE_ENV !== 'production' && warn(
       `Do not mount Vue to <html> or <body> - mount to normal elements instead.`
     )
+    // 开发环境，el最终对应的元素节点不能是 html 或者 body，不然会被覆盖
     return this
   }
 
   const options = this.$options
   // resolve template/el and convert to render function
   if (!options.render) {
+    // render方法不存在
     let template = options.template
     if (template) {
       if (typeof template === 'string') {
