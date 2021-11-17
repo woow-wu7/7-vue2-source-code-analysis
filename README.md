@@ -227,10 +227,10 @@ console.log(component1.data === component2.data) // false
 
 
 # 资料
-- 源码调试 https://juejin.cn/post/6883002751769378829
 - [[源码-vue01] data响应式 和 初始化渲染 ](https://juejin.im/post/6844904181094957069)
 - [[源码-vue02] computed 响应式 - 初始化，访问，更新过程 ](https://juejin.im/post/6844904184035147790)
 - [[源码-vue03] watch 侦听属性 - 初始化和更新 ](https://juejin.im/post/6844904186652409863)
 - [[源码-vue04] Vue.set 和 vm.$set](https://juejin.im/post/6844904190918000654)
 - [[源码-vue05] Vue.extend](https://juejin.im/post/6844904201944825863)
 - [[源码-vue06] Vue.nextTick 和 vm.$nextTick](https://juejin.im/post/6847902219107303438)
+- 源码调试 https://juejin.cn/post/6883002751769378829
