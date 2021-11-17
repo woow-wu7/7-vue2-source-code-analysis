@@ -3,9 +3,11 @@
 ## 一些单词
 ```
 reserve 保留 // isReserved ---> vue中 ( $ 和 _ 是保留字 )
+noop 空操作 // 常用来表示一个空函数 () => {}
 ```
 
 ## (一) 如何调试Vue2.0源码
+### (1) 利用vue源码库代码进行调试
 - 第一步
   - 克隆 vue2.0 源码
   - git clone git@github.com:vuejs/vue.git
@@ -52,6 +54,23 @@ reserve 保留 // isReserved ---> vue中 ( $ 和 _ 是保留字 )
   - 再在浏览器中打开 index.html，再F12调试，再看到Sources面板，发现多出了 src 文件，就是整个vue的源文件了
   - 现在就可以断点调试vue2的源码了
 
+### (2) 利用vue-cli新建项目调试
+- 第一步
+  - 使用 vue-cli 新建一个vue2的项目
+- 第二步
+  - 找到 node_modules 中的 vue
+  - 找到 vue 的 package.json 中的 main 和 module 字段
+    - 1. main，module，browser的区别
+      - **main**：定义了npm包的入口文件，browser和node环境都能使用
+      - **module**：定义了npm包的ESM规范的入口文件，browser和node环境都能使用 - ESM就是 es module
+      - **browser**：定义 npm 包在 browser 环境下的入口文件
+    - 2. **main，module，browser的加载顺序**
+      - `browser > module > main`
+    - 3. .js 和 .mjs 的区别
+      - .mjs：是在node环境中能执行ESM规范代码的文件
+      - 优先级： ( `.mjs > .js` ) 即 import 和 require 时优先加载 `.mjs` 文件
+  - 在dist文件夹中找到 `vue.esm.js` 文件
+    - debugger 想要的代码即可
 
 ## (二) 对比 vue 和 react-redux 源码中对 plainObject 纯对象的判断
 
@@ -157,10 +176,61 @@ react-redux 中如何利用 ( 原型链 ) 来判断是否是 plainObject
   - 对象
   - 函数
 - 为什么组件被定义，data必须是一个函数，并且该函数返回一个数据对象？
-  - 因为：`组件可能被用来创建多个实例`
+  - 因为：
+    - data属性是被挂载在构造函数的prototype上的
+      - data如果是一个对象，实例会共享，修改会相互影响
+      - data如果是一个函数，内部返回一个对象，则每次执行data都会返回用对象字面量新生成一个新的对象，在不同的内存当中
   - 详细
     - 如果data是对象：则所有实例都会 ( 共享引用 ) ( 同一个data对象 )
-    - 如果data是函数：则每次新建实例，都会调用data函数，生成新的data对象，是不同的地址，独立不影响
+    - 如果data是函数：则每次新建实例，获取或修改data时，都会调用data函数，生成新的data对象并返回，是不同的地址，独立不影响
+```
+function Component() {
+  this.data = this.data();
+}
+Component.prototype.data = function () {
+  return {
+    count: 100,
+  };
+};
+const component1 = new Component()
+const component2 = new Component()
+console.log(component1.data === component2.data) // false
+```
+
+## (四) runtime 和 runtime+compiler版本 有什么区别？
+- runtime版本
+  - 直接使用render函数，不能使用 template 模版
+  - 渲染过程：`render函数 -> vnode -> 真实的dom`
+- runtime+compiler版本
+  - 会在运行的时候将template转成render函数执行
+  - 渲染过程：`template -> render函数 -> vnode -> 真实的dom`
+- 运行时版本相比完整版体积要小大约 30%
+
+## (五) 为什么大Vue不使用class而是使用构造函数呢？
+- 因为vue可以把不同的方法挂载原型链上，把实现代码单独抽离成文件，方便管理
+- 而class的话，所有非静态属性(原型属性)都必须在class内部声明，不利于大型工程文件管理
+
+## (六) Node.nodeType
+```
+元素节点 element 1
+属性节点 attr 2
+文本节点 text 3
+
+注释节点 comment 8
+文档节点 document 9
+文档类型节点 documentType 10
+文档片段节点 documentFragment 11
+```
+
+## (七) 为什么data，props，methods中的key不能相同？
+- 因为vue做了一层proxy后，可以通过vm.key访问，所以不能相同，相同后不能区分
+
 
 # 资料
 - 源码调试 https://juejin.cn/post/6883002751769378829
+- [[源码-vue01] data响应式 和 初始化渲染 ](https://juejin.im/post/6844904181094957069)
+- [[源码-vue02] computed 响应式 - 初始化，访问，更新过程 ](https://juejin.im/post/6844904184035147790)
+- [[源码-vue03] watch 侦听属性 - 初始化和更新 ](https://juejin.im/post/6844904186652409863)
+- [[源码-vue04] Vue.set 和 vm.$set](https://juejin.im/post/6844904190918000654)
+- [[源码-vue05] Vue.extend](https://juejin.im/post/6844904201944825863)
+- [[源码-vue06] Vue.nextTick 和 vm.$nextTick](https://juejin.im/post/6847902219107303438)

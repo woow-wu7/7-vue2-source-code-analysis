@@ -46,13 +46,13 @@ export default class Watcher {
 
   constructor (
     vm: Component,
-    expOrFn: string | Function,
+    expOrFn: string | Function, // 表达式 || 函数
     cb: Function,
     options?: ?Object,
-    isRenderWatcher?: boolean  // 是否是renderWatcher
+    isRenderWatcher?: boolean  // 是否是renderWatcher，即渲染watcher
   ) {
     this.vm = vm
-    if (isRenderWatcher) {
+    if (isRenderWatcher) { // watcher渲染watcher
       vm._watcher = this
     }
     vm._watchers.push(this)
@@ -67,7 +67,7 @@ export default class Watcher {
       this.deep = this.user = this.lazy = this.sync = false
       // options 不存在时，默认都设置为 false
     }
-    this.cb = cb
+    this.cb = cb // 第三个参数，当mount阶段时，cb是一个noop空函数
     this.id = ++uid // uid for batching
     this.active = true
     this.dirty = this.lazy // for lazy watchers
@@ -79,9 +79,12 @@ export default class Watcher {
       ? expOrFn.toString()
       : ''
     // parse expression for getter
+    // 1 expOrFn 是一个函数
     if (typeof expOrFn === 'function') {
+      // 如果传入 Watcher 构造函数的 ( 第二个参数expOrFn是一个函数 )
       this.getter = expOrFn
     } else {
+      // 2 expOrFn 是一个表达式
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
         this.getter = noop
@@ -107,6 +110,7 @@ export default class Watcher {
     const vm = this.vm
     try {
       value = this.getter.call(vm, vm)
+      // 执行getter()，传入vm作为参数
     } catch (e) {
       if (this.user) {
         handleError(e, vm, `getter for watcher "${this.expression}"`)

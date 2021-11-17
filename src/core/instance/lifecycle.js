@@ -188,14 +188,30 @@ export function mountComponent (
       measure(`vue ${name} patch`, startTag, endTag)
     }
   } else {
+    // updateComponent
+
     updateComponent = () => {
       vm._update(vm._render(), hydrating)
+      // 1
+      // updateComponent
+      // 赋值：updateComponent 是在这里赋值的
+      // 执行：
+      // - 是触发了响应式的 set 方法，调用watcher.update()方法时执行的
+      // - 其实就是 new Watcher(vm, updateComponent, noop, {...})的方式执行
+      // 2
+      // hydrating 是一个标志位，为true时表示服务端渲染
+      // 3
+      // vm.render() 的作用就是把template编译成 vnode
     }
+
   }
 
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
+  // Watcher
+  // - Watcher构造函数接受 5 个参数
+  // - constructor ( vm: Component, expOrFn: string | Function, cb: Function, options?: ?Object, isRenderWatcher?: boolean )
   new Watcher(vm, updateComponent, noop, {
     before () {
       if (vm._isMounted && !vm._isDestroyed) {

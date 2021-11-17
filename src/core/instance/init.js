@@ -15,7 +15,7 @@ let uid = 0
 // initMixin
 export function initMixin (Vue: Class<Component>) {
 
-  // Vue.prototpye._init
+  // Vue.prototype._init
   Vue.prototype._init = function (options?: Object) {
     const vm: Component = this
     // a uid
@@ -68,6 +68,7 @@ export function initMixin (Vue: Class<Component>) {
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
 
+    // $mount
     if (vm.$options.el) {
       vm.$mount(vm.$options.el) // mount阶段
     }

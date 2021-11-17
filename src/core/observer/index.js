@@ -48,7 +48,7 @@ export class Observer {
     this.value = value
     this.dep = new Dep()
     this.vmCount = 0
-    def(value, '__ob__', this)
+    def(value, '__ob__', this) // value.__ob__ = this，不可枚举，初始化时value是data
     // 1
     // def
     // export function def (obj: Object, key: string, val: any, enumerable?: boolean) {
@@ -109,7 +109,8 @@ export class Observer {
       this.observeArray(value)
       // observeArray (items: Array<any>) {
       //   for (let i = 0, l = items.length; i < l; i++) {
-      //     observe(items[i]) // 观测数组每个成员，在observe中会做 ( 依赖收集 ) 和 ( 派发更新 ) 的流程
+      //     observe(items[i])
+      //     // 观测数组每个成员，在observe中会做 ( 依赖收集 ) 和 ( 派发更新 ) 的流程
       //   }
       // }
     } else {
@@ -131,6 +132,7 @@ export class Observer {
     const keys = Object.keys(obj) // 遍历自身属性 + 可枚举属性
     for (let i = 0; i < keys.length; i++) {
       defineReactive(obj, keys[i])
+      // 定义响应式对象，将每个属性变为响应式数据
     }
   }
 
@@ -181,7 +183,7 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
 // 返回：ob对象 -> Observer | void
 export function observe (value: any, asRootData: ?boolean): Observer | void {
   if (!isObject(value) || value instanceof VNode) {
-    // 如果 value 不是一个 ( 对象 和 数组 ) 或者 是一个 VNode，则直接返回
+    // 如果 value 不是一个 ( 对象 和 数组 ) 或者 ( 是一个 VNode 实例 )，则直接返回
     return
     // export function isObject (obj: mixed): boolean %checks {
     //   return obj !== null && typeof obj === 'object'
@@ -195,7 +197,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     // 观察过 -------> __ob__属性存在，则直接复用
     ob = value.__ob__
   } else if (
-    // 未观察过，则生成新的 ob
+    // 未观察过 ------> 则通过 new Observer() 生成新的 ob
     shouldObserve &&
     !isServerRendering() &&
     (Array.isArray(value) || isPlainObject(value)) &&
@@ -234,19 +236,25 @@ export function defineReactive (
   if (property && property.configurable === false) {
     return
     // 如果该属性 对应的 属性描述对象不能被修改，该属性不能被删除的话，直接返回
+    // 下面要重写 getter 和 setter
   }
 
   // cater for pre-defined getter/setters
-  const getter = property && property.get // 获取 - 描述符对象中的get
+  const getter = property && property.get // 获取 - 描述符对象中的get，data初始化声明的都没有get和set
   const setter = property && property.set
   if ((!getter || setter) && arguments.length === 2) {
-    // 如果 getter 不存在，或者 setter存在
-    // 并且 defineReactive 中传入的参数有两个时候，即 defineReactive(obj, keys[i])
+    // 如果 getter 不存在，或者 setter存在，满足其中一个条件则继续
+    // 并且 defineReactive 中传入的参数有两个时候，即initData时是 defineReactive(obj, keys[i])
     val = obj[key]
     // 因为如果只有两个参数时，val是undefined，然后在这里重新赋值成 obj[key]
+    // val是defineReactive()函数的第三个参数，这里被重新赋值了，即obj[key]
   }
 
   let childOb = !shallow && observe(val)
+  // 初始化 initData 时，shallow=undefined
+  // ( 结论 ) 这里表示的是：如果shallow不存在，就继续观察val，执行observe(val)
+  //  - 如果val还是一个对象，则会继续往下执行，返回ob
+  //  - 如果val不是一个对象，则返回undefined，则childOb=undefined
   // 继续观测对象的每一项的value值,如果还是对象就继续观察 添加响应Object.defineProperty
   // shallow：是浅的意思，表示不是浅观察的的话
 

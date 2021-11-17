@@ -223,6 +223,7 @@ function initData (vm: Component) {
     }
     if (props && hasOwn(props, key)) {
       // ( data中的key ) 不能和 ( props中的key ) 同名
+      // 理论上 props 优先
       process.env.NODE_ENV !== 'production' && warn(
         `The data property "${key}" is already declared as a prop. ` +
         `Use prop default value instead.`,
@@ -241,13 +242,14 @@ function initData (vm: Component) {
       // props，data，methods中没有同名的key，并且该key不是vue保留字，就执行代理 proxy 函数
       // vue 中 $ 和 _ 是保留字
       // 3
-      // proxy 的作用：vm[key] = vm._data'[key]
+      // proxy 的作用：vm[key] = vm._data'[key]，即将data中的属性代理到vm上
       proxy(vm, `_data`, key)
     }
   }
   // observe data
   // data 的响应式
   // observer是有返回值的，返回的是一个ob对象，即 observer 对象实例
+  // observe第二个参数，表示是否是 RootData
   observe(data, true /* asRootData */)
 }
 
