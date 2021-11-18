@@ -183,11 +183,11 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
 // 返回：ob对象 -> Observer | void
 export function observe (value: any, asRootData: ?boolean): Observer | void {
   if (!isObject(value) || value instanceof VNode) {
-    // 如果 value 不是一个 ( 对象 和 数组 ) 或者 ( 是一个 VNode 实例 )，则直接返回
+    // 如果 value 不是一个 ( 对象  ) 或者 ( 是一个 VNode 实例 )，则直接返回
     return
     // export function isObject (obj: mixed): boolean %checks {
     //   return obj !== null && typeof obj === 'object'
-    //   其实就是 object 和 array
+    //   其实就是 object
     // }
   }
   let ob: Observer | void

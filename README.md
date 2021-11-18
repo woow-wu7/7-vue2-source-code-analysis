@@ -224,6 +224,7 @@ console.log(component1.data === component2.data) // false
 
 ## (七) 为什么data，props，methods中的key不能相同？
 - 因为vue做了一层proxy后，可以通过vm.key访问，所以不能相同，相同后不能区分
+- 在源码中就是先做了两次判断data和prop，methods中的key不能相同后，才进行proxy(vm, '_data', key)代理，把 data中的属性代理到vm上
 
 
 # 资料

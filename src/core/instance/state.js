@@ -73,12 +73,12 @@ export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options // 获取vm中掺入的配置对象 options
   if (opts.props) initProps(vm, opts.props) // ------------ initProps
-  if (opts.methods) initMethods(vm, opts.methods) // ------ initMethods
+  if (opts.methods) z(vm, opts.methods) // ------ initMethods
   if (opts.data) {
     initData(vm)
     // ---------------------------------------------------- initData
   } else {
-    // data 不存在，传入空对象作为初始化data -> rootData
+    // data 不存在，传入空对象作为初始化data -> 进行observe
     observe(vm._data = {}, true /* asRootData */)
   }
   if (opts.computed) initComputed(vm, opts.computed) // --- initComputed
@@ -162,6 +162,10 @@ function initData (vm: Component) {
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
     : data || {}
+  // data
+  // - 函数：返回值是一个对象
+  // - 对象：plainObject
+  // - data只能是上面两种情况
   // vm.$options.data === vm._data === vm.$data
   // 3
   // data
@@ -176,7 +180,7 @@ function initData (vm: Component) {
   // - data不存在时，做了熔断处理，将 {} 赋值给 data
 
   if (!isPlainObject(data)) {
-    // 判断是否是 plainObject 纯对象
+    // 判断 data 是否是 plainObject 纯对象
     // 1
     // 什么是纯对象？
     // - plainObject是通过 ( 对象字面量方式声明{} ) 或者通过 ( Object.create() ) 生成的对象
