@@ -73,7 +73,7 @@ export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options // 获取vm中掺入的配置对象 options
   if (opts.props) initProps(vm, opts.props) // ------------ initProps
-  if (opts.methods) z(vm, opts.methods) // ------ initMethods
+  if (opts.methods) initMethods(vm, opts.methods) // ------ initMethods
   if (opts.data) {
     initData(vm)
     // ---------------------------------------------------- initData
@@ -174,8 +174,7 @@ function initData (vm: Component) {
   // - data是一个 函数
   //    - data 是函数时，就执行 getData(data, vm)
   //    - data是一个函数的好处：
-  //      - 当一个组件被定义，data 必须声明为返回一个初始数据对象的函数，因为组件可能被用来创建多个实例
-  //      - 如果data是对象：则所有实例都会 ( 共享引用 ) ( 同一个data对象 )
+  //      - 如果data是对象：则所有实例都会 ( 共享引用 ) ( 同一个原型上的data对象 )
   //      - 如果data是函数：则每次新建实例，都会调用data函数，生成新的data对象，是不同的地址，独立不影响
   // - data不存在时，做了熔断处理，将 {} 赋值给 data
 

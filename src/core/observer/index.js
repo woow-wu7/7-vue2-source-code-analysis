@@ -48,7 +48,9 @@ export class Observer {
     this.value = value
     this.dep = new Dep()
     this.vmCount = 0
-    def(value, '__ob__', this) // value.__ob__ = this，不可枚举，初始化时value是data
+    def(value, '__ob__', this)
+    // value.__ob__ = this，不可枚举，初始化时value是data
+    // this 指的是 observer 实例
     // 1
     // def
     // export function def (obj: Object, key: string, val: any, enumerable?: boolean) {
@@ -61,8 +63,9 @@ export class Observer {
     // }
     // 2
     // def的作用
-    // - 给 data 添加 __ob__ 属性，值是 observer 实例
-    // - data.__ob__ = observer实例
+    // - 给 value 添加 __ob__ 属性，值是 observer 实例
+    // - value.__ob__ = observer实例
+    // - ！！！注意：这里的value不一定是data对象，因为data会递归的执行，这里的value也可能是value中的属性
     // 3
     // 这里def的第四个参数不存在，说明 __ob__ 属性是不可枚举的，所以不能被
     // - Object.keys() 遍历自身属性 + 可枚举属性
@@ -75,6 +78,7 @@ export class Observer {
         // hasProto
         // export const hasProto = '__proto__' in {}
         // 表示该环境中存在 __proto__属性，说明是浏览器环境
+        // 注意：in 会包含 自身属性+继承的属性
         // 2
         // in
         // 'name' in { name: 'woow_wu7' }
@@ -98,11 +102,18 @@ export class Observer {
         //     def(target, key, src[key])
         //   }
         // }
-        protoAugment(value, arrayMethods) // ------------------ 如果是数组并且__proto__存在，则将 value.__pro__ =  Object.create(Array.prototype)
-        // protoAugment(value, arrayMethods) 的作用就是：让value继承了重写的7中数组方法的数组
+        protoAugment(value, arrayMethods) // ------------------ 如果是数组并且__proto__存在
+        // 1
+        // arrayMethods
+        // - 是一个数组，上面从写了7种数组中的方法，然后对添加的成员继续observe，并且手动dep.notify()
+        // 2
+        // protoAugment(value, arrayMethods)
+        // - 的作用就是：让value继承了重写的7中数组方法的数组
       } else {
         // 不存在 {}.__proto__
         copyAugment(value, arrayMethods, arrayKeys) // -------- 如果是数组并且不存在__proto__
+        // copyAugment(value, arrayMethods, arrayKeys)
+        // - 的作用也是一样：就是让value可以继承重写了7种方法的数组
       }
 
       // 观测 - 数组
@@ -113,6 +124,9 @@ export class Observer {
       //     // 观测数组每个成员，在observe中会做 ( 依赖收集 ) 和 ( 派发更新 ) 的流程
       //   }
       // }
+      // 注意注意注意：
+      // 1. 这里观测是是 value 本身
+      // 2. 在 arrayMethods 上也进行了观测，观测的是 添加方法push，unshift, splice 包装成的数组，并且手动dep.notify()
     } else {
       // 观测 - 对象
       // value 不是数组，则 观测对象
