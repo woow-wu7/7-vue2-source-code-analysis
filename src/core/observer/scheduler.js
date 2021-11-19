@@ -92,7 +92,7 @@ function flushSchedulerQueue () {
     }
     id = watcher.id
     has[id] = null
-    watcher.run()
+    watcher.run() // 执行 watcher.run()
     // in dev build, check and stop circular updates.
     if (process.env.NODE_ENV !== 'production' && has[id] != null) {
       circular[id] = (circular[id] || 0) + 1
@@ -168,7 +168,7 @@ export function queueWatcher (watcher: Watcher) {
   if (has[id] == null) {
     has[id] = true
     if (!flushing) {
-      queue.push(watcher)
+      queue.push(watcher) // 向更新队列中push watcher
     } else {
       // if already flushing, splice the watcher based on its id
       // if already past its id, it will be run next immediately.

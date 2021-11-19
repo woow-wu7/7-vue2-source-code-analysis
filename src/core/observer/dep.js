@@ -71,6 +71,7 @@ export default class Dep {
       // we need to sort them now to make sure they fire in correct
       // order
       subs.sort((a, b) => a.id - b.id)
+      // 保证各种watcher的顺序
     }
     for (let i = 0, l = subs.length; i < l; i++) {
       subs[i].update() // 执行 watcher 中的 update 方法

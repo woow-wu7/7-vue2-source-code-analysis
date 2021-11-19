@@ -105,12 +105,12 @@ export default class Watcher {
    * Evaluate the getter, and re-collect dependencies.
    */
   get () {
-    pushTarget(this)
+    pushTarget(this) // 向 targetStack 栈中添加 watcher，并且把该 watcher 设置为 Dep.target 静态属性的值
     let value
     const vm = this.vm
     try {
       value = this.getter.call(vm, vm)
-      // 执行getter()，传入vm作为参数
+      // 执行getter()，传入vm作为参数，求值
     } catch (e) {
       if (this.user) {
         handleError(e, vm, `getter for watcher "${this.expression}"`)
@@ -123,7 +123,7 @@ export default class Watcher {
       if (this.deep) {
         traverse(value)
       }
-      popTarget()
+      popTarget() // 出栈
       this.cleanupDeps()
     }
     return value
@@ -180,7 +180,8 @@ export default class Watcher {
     /* istanbul ignore else */
     if (this.lazy) {
       this.dirty = true // this.dirty = this.lazy
-    } else if (this.sync) { // watch
+    } else if (this.sync) {
+      // watch，优先执行
       this.run()
     } else {
       queueWatcher(this)
@@ -206,11 +207,11 @@ export default class Watcher {
         // set new value
         const oldValue = this.value
         this.value = value
-        if (this.user) {
+        if (this.user) { // userWatcher
           const info = `callback for watcher "${this.expression}"`
           invokeWithErrorHandling(this.cb, this.vm, [value, oldValue], this.vm, info)
         } else {
-          this.cb.call(this.vm, value, oldValue)
+          this.cb.call(this.vm, value, oldValue) // watch对象中函数被执行，第一个参数是newValue，第二个参数是oldValue
         }
       }
     }

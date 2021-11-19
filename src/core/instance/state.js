@@ -180,6 +180,9 @@ function initData (vm: Component) {
 
   if (!isPlainObject(data)) {
     // 判断 data 是否是 plainObject 纯对象
+    // 注意！！！！！
+    //  - 1. 只能是对象 -------------> 这里组件中的data属性只能是一个对象，或者一个函数返回一个对象，并且是一个plainObject
+    //  - 2. 可以是对象，也可以是数组 -> 但是 observe(value) 的参数即可以是对象，也是可使数组；因为data和data的属性都需要进行observe()，data的属性也可能是一个对象或数组
     // 1
     // 什么是纯对象？
     // - plainObject是通过 ( 对象字面量方式声明{} ) 或者通过 ( Object.create() ) 生成的对象
@@ -235,7 +238,7 @@ function initData (vm: Component) {
     } else if (!isReserved(key)) {
       // 1
       // isReserved
-      // reserve 是保留字的意思
+      // reserve 是保留字的意思，表示不能是vue中的保留字，比如 $ _
       // export function isReserved (str: string): boolean {
       //   const c = (str + '').charCodeAt(0)
       //   return c === 0x24 || c === 0x5F

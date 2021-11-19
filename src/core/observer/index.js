@@ -197,11 +197,15 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
 // 返回：ob对象 -> Observer | void
 export function observe (value: any, asRootData: ?boolean): Observer | void {
   if (!isObject(value) || value instanceof VNode) {
-    // 如果 value 不是一个 ( 对象  ) 或者 ( 是一个 VNode 实例 )，则直接返回
+    // 如果 value 不是一个 ( 对象 或 数组 ) 或者 ( 是一个 VNode 实例 )，则直接返回
+    // 注意：
+    //  - 这里value可以是对象，也可以是数组
+    //  - 为什么这里可以是数组？
+    //    - 因为除了 ( data本身可以进行observe )，( data的属性属性也会observer )
     return
     // export function isObject (obj: mixed): boolean %checks {
     //   return obj !== null && typeof obj === 'object'
-    //   其实就是 object
+    //   其实就是 object 和 array
     // }
   }
   let ob: Observer | void
@@ -218,7 +222,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     Object.isExtensible(value) &&
     !value._isVue
   ) {
-    ob = new Observer(value)
+    ob = new Observer(value) // value = object ｜ array
   }
   if (asRootData && ob) {
     // 如果是根data即new Vue()初始化的时候传入的data 并且 ob 存在
@@ -266,6 +270,7 @@ export function defineReactive (
 
   let childOb = !shallow && observe(val)
   // 初始化 initData 时，shallow=undefined
+  // observe(obj[key]) 表示继续观察obj中的属性，如果条件成立的话
   // ( 结论 ) 这里表示的是：如果shallow不存在，就继续观察val，执行observe(val)
   //  - 如果val还是一个对象，则会继续往下执行，返回ob
   //  - 如果val不是一个对象，则返回undefined，则childOb=undefined
@@ -278,12 +283,13 @@ export function defineReactive (
     configurable: true,
     get: function reactiveGetter () {
       const value = getter ? getter.call(obj) : val
-      if (Dep.target) {
-        dep.depend()
-        if (childOb) {
-          childOb.dep.depend()
+      // value进行过依赖收集，就调用getter，否则将计算的值赋值给value
+      if (Dep.target) { // ---------------------------- 当前正在观察的watcher
+        dep.depend() // ------------------------------- 依赖收集
+        if (childOb) { // ----------------------------- 如果子的 ob 存在，observer() 会返回ob，ob其实就是Observer构造函数执行生成的实例
+          childOb.dep.depend() // --------------------- 继续做依赖收集
           if (Array.isArray(value)) {
-            dependArray(value)
+            dependArray(value) // --------------------- 每个成员满足条件逐个做依赖收集
             // function dependArray (value: Array<any>) {
             //   for (let e, i = 0, l = value.length; i < l; i++) {
             //     e = value[i]
@@ -296,13 +302,15 @@ export function defineReactive (
           }
         }
       }
-      return value
+      return value // 处理完上面的逻辑后，返回该属性对应的值
     },
     set: function reactiveSetter (newVal) {
-      const value = getter ? getter.call(obj) : val
+      const value = getter ? getter.call(obj) : val // 求值
       /* eslint-disable no-self-compare */
       if (newVal === value || (newVal !== newVal && value !== value)) {
         return
+        // 现在设置的值，和之前设的值相等，就不走set，说明之前set过
+        // 引用类型时，newVal !== newVal， value !== value
       }
       /* eslint-enable no-self-compare */
       if (process.env.NODE_ENV !== 'production' && customSetter) {
@@ -311,11 +319,13 @@ export function defineReactive (
       // #7981: for accessor properties without setter
       if (getter && !setter) return
       if (setter) {
-        setter.call(obj, newVal)
+        setter.call(obj, newVal) // setter计算
       } else {
-        val = newVal
+        val = newVal // 直接赋值
       }
+      // set后重新做依赖收集
       childOb = !shallow && observe(newVal)
+      // 派发更新
       dep.notify()
     }
   })
@@ -395,10 +405,10 @@ export function del (target: Array<any> | Object, key: any) {
  */
 function dependArray (value: Array<any>) {
   for (let e, i = 0, l = value.length; i < l; i++) {
-    e = value[i]
+    e = value[i] // 数组中的每一个项，如果具有__ob__属性，做dep.depend()依赖收集
     e && e.__ob__ && e.__ob__.dep.depend()
     if (Array.isArray(e)) {
-      dependArray(e)
+      dependArray(e) // 递归每一个项
     }
   }
 }
