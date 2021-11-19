@@ -227,6 +227,8 @@ console.log(component1.data === component2.data) // false
 - 在源码中就是先做了两次判断data和prop，methods中的key不能相同后，才进行proxy(vm, '_data', key)代理，把 data中的属性代理到vm上
 
 
+# Xmind
+- [xmind-思维导图](https://github.com/woow-wu7/7-vue2-source-code-analysis/blob/main/xmind/)
 # 资料
 - [[源码-vue01] data响应式 和 初始化渲染 ](https://juejin.im/post/6844904181094957069)
 - [[源码-vue02] computed 响应式 - 初始化，访问，更新过程 ](https://juejin.im/post/6844904184035147790)
