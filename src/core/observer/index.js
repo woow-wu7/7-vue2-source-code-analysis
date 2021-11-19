@@ -51,6 +51,16 @@ export class Observer {
     // this.dep
     // - 每个 ( 对象或数组 ) 都对应一个 ( dep ) 实例
     // - 什么意思：就是data，以及data属性是一个对象和数组的属性都会有对应的dep实例
+    // - dep 中有哪些属性？
+    //    - 静态属性：Dep.target 表示正在计算的 ( watcher )
+    //    - 原型属性：
+    //      - subs 用来存放订阅了dep的 ( watcher )
+    //      - addSub
+    //      - removeSub
+    //      - depend notify
+    // - dep 主要用来做什么
+    //    - 用来关联 ( data||data属性 ) <---> dep <---> watcher
+    //    - 做依赖收集和派发更新
 
     this.vmCount = 0
     def(value, '__ob__', this)
