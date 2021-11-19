@@ -60,6 +60,7 @@ export class Observer {
     //      - depend notify
     // - dep 主要用来做什么
     //    - 用来关联 ( data||data属性 ) <---> dep <---> watcher
+    //    - dep.depend() ---> watcher.addDep(dep) ---> dep.addSubs(watcher)
     //    - 做依赖收集和派发更新
 
     this.vmCount = 0
