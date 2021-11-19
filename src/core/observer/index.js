@@ -46,7 +46,12 @@ export class Observer {
 
   constructor (value: any) {
     this.value = value
+
     this.dep = new Dep()
+    // this.dep
+    // - 每个 ( 对象或数组 ) 都对应一个 ( dep ) 实例
+    // - 什么意思：就是data，以及data属性是一个对象和数组的属性都会有对应的dep实例
+
     this.vmCount = 0
     def(value, '__ob__', this)
     // value.__ob__ = this，不可枚举，初始化时value是data
@@ -201,7 +206,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     // 注意：
     //  - 这里value可以是对象，也可以是数组
     //  - 为什么这里可以是数组？
-    //    - 因为除了 ( data本身可以进行observe )，( data的属性属性也会observer )
+    //    - 因为除了 ( data本身可以进行observe() )，( data的属性属性也会observe() )，只是必须是对象和数组，不然会直接return
     return
     // export function isObject (obj: mixed): boolean %checks {
     //   return obj !== null && typeof obj === 'object'
