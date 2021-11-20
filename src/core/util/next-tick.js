@@ -142,7 +142,7 @@ export function nextTick (cb?: Function, ctx?: Object) {
   // $flow-disable-line
   if (!cb && typeof Promise !== 'undefined') {
     return new Promise(resolve => {
-      _resolve = resolve
+      _resolve = resolve // 这部分的实现，和 axios 源码中的 取消请求CancelToken部分实现类似
     })
   }
 }
