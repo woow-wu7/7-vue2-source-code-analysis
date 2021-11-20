@@ -85,9 +85,9 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
   // e.g. PhantomJS, iOS7, Android 4.4
   // (#6466 MutationObserver is unreliable in IE11)
   let counter = 1
-  const observer = new MutationObserver(flushCallbacks)
-  const textNode = document.createTextNode(String(counter))
-  observer.observe(textNode, {
+  const observer = new MutationObserver(flushCallbacks) // ------------------ 新建 observer 实例
+  const textNode = document.createTextNode(String(counter)) // -------------- 需要观察的目标节点，是一个文本节点，nodeType=3
+  observer.observe(textNode, { // ------------------------------------------- 开始观察
     characterData: true
   })
   timerFunc = () => {
