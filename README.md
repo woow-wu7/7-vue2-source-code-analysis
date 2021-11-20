@@ -229,6 +229,8 @@ console.log(component1.data === component2.data) // false
 - 在源码中就是先做了两次判断data和prop，methods中的key不能相同后，才进行proxy(vm, '_data', key)代理，把 data中的属性代理到vm上
 
 ## (八) nextTick
+- 其实就是逐渐降级的过程
+- Promise -> MutationObserver -> setImmediate -> setTimeout
 
 ### (8.1) 前置知识
 - **ref**
@@ -354,6 +356,23 @@ console.log(component1.data === component2.data) // false
 5
 需求: 要在数据更后，立即获取DOM，而此时DOM并没有更新，需要拿到最新的DOM怎么办？
 回答：就可以使用 Vue.nextTick() 或者 VM.$nextTick() 在更新数据后获取更新后的DOM
+```
+
+### (8.2) nextTick 源码核心流程
+```
+1. 向 callbacks 队列中push这样一个函数，两种类型
+    - () => cb.call(ctx)
+    - () => _resolve(ctx)
+
+2. 执行 timerFunc()
+
+3. timerFunc() 是一个逐渐降级的过程：Promise -> MutationObserver -> setImmediate -> setTimeout
+  - timerFunc = () => { Promise.resolve().then(flushCallbacks) }
+  - timerFunc = () => { counter = (counter + 1) % 2 textNode.data = String(counter) }
+  - timerFunc = () => { setImmediate(flushCallbacks) }
+  - timerFunc = () => { setTimeout(flushCallbacks, 0) }
+
+4. flushCallbacks() 执行 callbacks 队列中的所有方法
 ```
 
 # Xmind

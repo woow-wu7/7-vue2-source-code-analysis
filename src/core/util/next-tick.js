@@ -6,15 +6,25 @@ import { handleError } from './error'
 import { isIE, isIOS, isNative } from './env'
 
 export let isUsingMicroTask = false
+// isUsingMicroTask
+// 标志位，表示是否使用 微任务队列
 
-const callbacks = [] // 存放nextTick的参数回调函数
+const callbacks = []
+// callbacks
+// 存放nextTick的参数回调函数
+// 是这样的一个数组
+// 1. Vue.nextTick 中的第一个参数cb存在  --------------------> [() => {cb.call(ctx)}]
+// 2. Vue.nextTick 中的第一个参数cb不存在，但支持promise -----> [() => {_resolve(ctx)}]
+
 let pending = false
+// pending
+// 标志位，同一时间只能执行 timerFunc 函数一次
 
 function flushCallbacks () {
   pending = false
-  const copies = callbacks.slice(0)
+  const copies = callbacks.slice(0) // 浅拷贝
   callbacks.length = 0
-  for (let i = 0; i < copies.length; i++) {
+  for (let i = 0; i < copies.length; i++) { // 执行 callbacks 中的所有函数
     copies[i]()
   }
 }
@@ -30,7 +40,20 @@ function flushCallbacks () {
 // where microtasks have too high a priority and fire in between supposedly
 // sequential events (e.g. #4521, #6690, which have workarounds)
 // or even between bubbling of the same event (#6566).
+
+
+
+// ======================================================================================
 let timerFunc
+// timerFunc
+// 是一个逐渐降级的过程：Promise -> MutationObserver -> setImmediate -> setTimeout
+//  timerFunc = () => { Promise.resolve().then(flushCallbacks) }
+//  timerFunc = () => { counter = (counter + 1) % 2 textNode.data = String(counter) }
+//  timerFunc = () => { setImmediate(flushCallbacks) }
+//  timerFunc = () => { setTimeout(flushCallbacks, 0) }
+// ======================================================================================
+
+
 
 // The nextTick behavior leverages the microtask queue, which can be accessed
 // via either native Promise.then or MutationObserver.
@@ -39,6 +62,7 @@ let timerFunc
 // completely stops working after triggering a few times... so, if native
 // Promise is available, we will use it:
 /* istanbul ignore next, $flow-disable-line */
+// -------------------------------------------------------------------------- 1. Promise
 if (typeof Promise !== 'undefined' && isNative(Promise)) {
   const p = Promise.resolve()
   timerFunc = () => {
@@ -51,6 +75,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
     if (isIOS) setTimeout(noop)
   }
   isUsingMicroTask = true
+// -------------------------------------------------------------------------- 2. MutationObserver
 } else if (!isIE && typeof MutationObserver !== 'undefined' && (
   isNative(MutationObserver) ||
   // PhantomJS and iOS 7.x
@@ -70,6 +95,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
     textNode.data = String(counter)
   }
   isUsingMicroTask = true
+// -------------------------------------------------------------------------- 3. setImmediate
 } else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
   // Fallback to setImmediate.
   // Technically it leverages the (macro) task queue,
@@ -77,6 +103,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
   timerFunc = () => {
     setImmediate(flushCallbacks)
   }
+// -------------------------------------------------------------------------- 4. setTimeout
 } else {
   // Fallback to setTimeout.
   timerFunc = () => {
@@ -104,6 +131,13 @@ export function nextTick (cb?: Function, ctx?: Object) {
   if (!pending) {
     pending = true
     timerFunc()
+    // -------------------------------- 执行 timerFunc()
+    // timerFunc
+    // 是一个逐渐降级的过程：Promise -> MutationObserver -> setImmediate -> setTimeout
+    //  timerFunc = () => { Promise.resolve().then(flushCallbacks) }
+    //  timerFunc = () => { counter = (counter + 1) % 2 textNode.data = String(counter) }
+    //  timerFunc = () => { setImmediate(flushCallbacks) }
+    //  timerFunc = () => { setTimeout(flushCallbacks, 0) }
   }
   // $flow-disable-line
   if (!cb && typeof Promise !== 'undefined') {
