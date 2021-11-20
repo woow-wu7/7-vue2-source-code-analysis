@@ -196,6 +196,8 @@ export default class Watcher {
   run () {
     if (this.active) {
       const value = this.get()
+      // this.get() === this.getter = expOrFn
+      // expOrFn 是传入 Watcher() 构造函数的 第二个参数
       if (
         value !== this.value ||
         // Deep watchers and watchers on Object/Arrays should fire even

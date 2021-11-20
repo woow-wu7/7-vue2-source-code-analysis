@@ -7,7 +7,7 @@ import { isIE, isIOS, isNative } from './env'
 
 export let isUsingMicroTask = false
 
-const callbacks = []
+const callbacks = [] // 存放nextTick的参数回调函数
 let pending = false
 
 function flushCallbacks () {
@@ -84,16 +84,20 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
   }
 }
 
+// nextTick
 export function nextTick (cb?: Function, ctx?: Object) {
   let _resolve
   callbacks.push(() => {
+    // push 一个 ( 匿名函数 ) 进 callbacks 队列
+    // 内部用 try...catch 包装，那么每个函数执行报错不会影响整个程序的继续执行
     if (cb) {
       try {
-        cb.call(ctx)
+        cb.call(ctx) // 调用cb
       } catch (e) {
-        handleError(e, ctx, 'nextTick')
+        handleError(e, ctx, 'nextTick') // 错误处理
       }
     } else if (_resolve) {
+      // _resolve 是用来处理promise类型的nextTick
       _resolve(ctx)
     }
   })

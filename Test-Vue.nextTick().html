@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="root">
+      <p>{{count}}</p>
+      <button @click="add">change count</button>
+      <!-- ref --><input
+        type="text"
+        ref="inputRef"
+        v-model="count"
+        id="count"
+      />
+    </div>
+    <script>
+      new Vue({
+        el: "#root",
+        data() {
+          return {
+            count: 1,
+          };
+        },
+        methods: {
+          getInputValueBySync(type) {
+            const inputValue = this.$refs.inputRef.value; // ----- this.$refs
+            console.log(type, inputValue);
+          },
+          getInputValueByRefs(type) {
+            this.$nextTick(() => {
+              // ----------------------------- this.$nextTick()
+              this.getInputValueBySync(type);
+            });
+          },
+          add() {
+            this.count = this.count + 1;
+            this.getInputValueBySync("sync"); // 1
+            this.getInputValueByRefs("async - this.$nextTick"); // 2
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

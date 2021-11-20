@@ -4,6 +4,8 @@
 ```
 reserve 保留 // isReserved ---> vue中 ( $ 和 _ 是保留字 )
 noop 空操作 // 常用来表示一个空函数 () => {}
+polyfill 垫片 兜底
+model 模型
 ```
 
 ## (一) 如何调试Vue2.0源码
@@ -226,6 +228,75 @@ console.log(component1.data === component2.data) // false
 - 因为vue做了一层proxy后，可以通过vm.key访问，所以不能相同，相同后不能区分
 - 在源码中就是先做了两次判断data和prop，methods中的key不能相同后，才进行proxy(vm, '_data', key)代理，把 data中的属性代理到vm上
 
+## (8) nextTick
+
+### (8.1) 前置知识
+```1
+1. ref
+- 作用
+  - ref用来给 ( DOM元素 ) 或 ( 子组件 ) 注册引用信息
+  - 引用信息将会注册在父组件的 ( $refs ) 对象上
+- 使用
+  - 在DOM元素上使用：引用指向 ( DOM元素 )
+  - 在子组件上使用：引用指向组 ( 件实例 )
+- 注意点
+  - 不能在初始化渲染时访问
+  - $refs 不是响应式的
+- 常见案例
+  - 1.获取DOM元素
+  - 2.在父组件中获取子组件中的方法
+- 案例：
+  - 利用ref绑定DOM元素，通过 this.$refs 对象获取具体绑定的DOM元素
+  - 然后测试同步获取DOM的属性值，和this.$nextTick()获取DOM属性值
+-------
+<body>
+  <div id="root">
+    <p>{{count}}</p>
+    <button @click="add">change count</button>
+    <input type="text" ref="inputRef" v-model="count" id="count" />
+    <!-- ref -->
+  </div>
+  <script>
+    new Vue({
+      el: "#root",
+      data() {
+        return {
+          count: 1,
+        };
+      },
+      methods: {
+        getInputValueBySync(type) {
+          const inputValue = this.$refs.inputRef.value; // ----- this.$refs
+          console.log(type, inputValue);
+        },
+        getInputValueByRefs(type) {
+          this.$nextTick(() => { // ----------------------------- this.$nextTick()
+            this.getInputValueBySync(type);
+          });
+        },
+        add() {
+          this.count = this.count + 1;
+          this.getInputValueBySync("sync"); // 1
+          this.getInputValueByRefs("async - this.$nextTick"); // 2
+        },
+      },
+    });
+  </script>
+</body>
+```
+
+```2
+2. 宏任务 和 微任务
+- 常见的宏任务
+  - setTimeout
+  - setInterval
+  - setImmediate // 在node的poll阶段之后的check阶段中执行
+  - requestAnimationFrame
+- 常见的微任务
+  - promise
+  - process.nextTick // 在node生命周期的任意阶段优先执行，因为它是一个微任务
+  - MutationObserver
+```
 
 # Xmind
 - [xmind-思维导图](https://github.com/woow-wu7/7-vue2-source-code-analysis/blob/main/xmind/)

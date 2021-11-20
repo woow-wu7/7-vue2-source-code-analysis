@@ -56,6 +56,8 @@ export function initLifecycle (vm: Component) {
 }
 
 export function lifecycleMixin (Vue: Class<Component>) {
+  // 1
+  // _update
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     const prevEl = vm.$el
@@ -189,6 +191,7 @@ export function mountComponent (
     }
   } else {
     // updateComponent
+    // - 除了mount阶段执行外，也会在 dep.notify() renderWatcher派发更新流程中执行
 
     updateComponent = () => {
       vm._update(vm._render(), hydrating)
