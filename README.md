@@ -231,8 +231,10 @@ console.log(component1.data === component2.data) // false
 ## (八) nextTick
 
 ### (8.1) 前置知识
-```1
+- **ref**
+```111
 1. ref
+---
 - 作用
   - ref用来给 ( DOM元素 ) 或 ( 子组件 ) 注册引用信息
   - 引用信息将会注册在父组件的 ( $refs ) 对象上
@@ -245,9 +247,18 @@ console.log(component1.data === component2.data) // false
 - 常见案例
   - 1.获取DOM元素
   - 2.在父组件中获取子组件中的方法
-- 案例：
+```
+
+- **this.$nextTick(callback)**
+```222
+2. this.$nextTick(callback)
+---
+案例：
   - 利用ref绑定DOM元素，通过 this.$refs 对象获取具体绑定的DOM元素
   - 然后测试同步获取DOM的属性值，和this.$nextTick()获取DOM属性值 ( 更新后，直接获取ref的属性时并未变化，需要使用nextTick获取最新的DOM元素属性值)
+考点：
+  - this.$refs
+  - this.$nextTick(callback)
 -------
 <body>
   <div id="root">
@@ -285,8 +296,49 @@ console.log(component1.data === component2.data) // false
 </body>
 ```
 
-```2
-2. 宏任务 和 微任务
+- **this.$nextTick().then(callback)**
+```333
+3. this.$nextTick().then(callback)
+---
+<body>
+  <div id="root">
+    <p ref="countRef">{{count}}</p>
+    <button @click="add">直接获取innerHTML</button>
+    <button @click="addNextTickThen">nextTick.then()获取innerHtml</button>
+  </div>
+  <script>
+    new Vue({
+      el: "#root",
+      data() {
+        return {
+          count: 1,
+        };
+      },
+      methods: {
+        add() {
+          this.count = this.count + 1;
+          const _innerHTML = this.$refs.countRef.innerHTML;
+          console.log(`直接通过this.$refs获取p标签的innerHtml`, _innerHTML); // 获取的是更新前的值
+        },
+        addNextTickThen() {
+          this.count = this.count + 1;
+          this.$nextTick().then(() => {
+            const _innerHTML = this.$refs.countRef.innerHTML;
+            console.log(
+              `在this.$nextTick().then()的回调中，通过this.$refs获取p标签的innerHtml`, // 获取的是更新后的值
+              _innerHTML
+            );
+          });
+        },
+      },
+    });
+  </script>
+</body>
+```
+
+- **宏任务 和 微任务**
+```444
+4. 宏任务 和 微任务
 - 常见的宏任务
   - setTimeout
   - setInterval
@@ -296,6 +348,12 @@ console.log(component1.data === component2.data) // false
   - promise
   - process.nextTick // 在node生命周期的任意阶段优先执行，因为它是一个微任务
   - MutationObserver
+```
+
+```555
+5
+需求: 要在数据更后，立即获取DOM，而此时DOM并没有更新，需要拿到最新的DOM怎么办？
+回答：就可以使用 Vue.nextTick() 或者 VM.$nextTick() 在更新数据后获取更新后的DOM
 ```
 
 # Xmind
