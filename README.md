@@ -341,6 +341,7 @@ console.log(component1.data === component2.data) // false
 - **宏任务 和 微任务**
 ```444
 4. 宏任务 和 微任务
+---
 - 常见的宏任务
   - setTimeout
   - setInterval
@@ -356,6 +357,37 @@ console.log(component1.data === component2.data) // false
 5
 需求: 要在数据更后，立即获取DOM，而此时DOM并没有更新，需要拿到最新的DOM怎么办？
 回答：就可以使用 Vue.nextTick() 或者 VM.$nextTick() 在更新数据后获取更新后的DOM
+```
+
+- **MutationObserver()**
+```666
+6. MutationObserver
+---
+函数：MutationObserver(callback)
+
+作用：监测DOM的变化，DOM发生变化，就会触发MutationObserver的回调
+
+特点：
+  - 异步触发：它是 ( 异步触发 )，DOM 的变动并不会马上触发，而是要等到当前所有 DOM 操作都结束才触发
+  - 一起处理：它把 DOM 变动记录封装成一个 ( 数组 ) 进行处理，而不是一条条个别处理 DOM 变动
+
+
+案例：
+
+// 观察器的配置（需要观察什么变动）
+const config = { attributes: true, childList: true, subtree: true };
+
+// 当观察到变动时执行的回调函数
+const callback = function(mutationsList, observer) { ... ... }
+
+// 创建一个观察器实例并传入回调函数
+const observer = new MutationObserver(callback);
+
+// 以上述配置开始观察目标节点
+observer.observe(targetNode, config);
+
+// 之后，可停止观察
+observer.disconnect();
 ```
 
 ### (8.2) nextTick 源码核心流程
