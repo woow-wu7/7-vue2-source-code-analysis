@@ -88,7 +88,7 @@ function flushSchedulerQueue () {
   for (index = 0; index < queue.length; index++) {
     watcher = queue[index]
     if (watcher.before) {
-      watcher.before()
+      watcher.before() // beforeMount() 钩子
     }
     id = watcher.id
     has[id] = null

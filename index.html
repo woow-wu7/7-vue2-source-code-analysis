@@ -10,6 +10,8 @@
   <body>
     <div id="app">
       <p>{{count}}</p>
+
+      <button @click="add">add</button>
     </div>
     <script>
       new Vue({
@@ -27,6 +29,11 @@
         //   }, this.count)
         // }
         // 手写render函数
+        methods: {
+          add() {
+            this.count = this.count + 1
+          }
+        }
       });
     </script>
   </body>
