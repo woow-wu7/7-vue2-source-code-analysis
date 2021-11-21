@@ -41,8 +41,8 @@ export function initGlobalAPI (Vue: GlobalAPI) {
     defineReactive
   }
 
-  Vue.set = set
-  Vue.delete = del
+  Vue.set = set // Vue.set() 静态方法
+  Vue.delete = del // Vue.delete()
   Vue.nextTick = nextTick
 
   // 2.6 explicit observable API

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      对象：<div v-for="(value, index) in obj" :key="index">
+        <p>{{value}}</p>
+      </div>
+
+      <br>
+      数组：<div v-for="(item, index) in arr" :key="index">
+        <p>{{item}}</p>
+      </div>
+
+      <button @click="changeObj">change-Obj-Property</button>
+      <button @click="addObj">add-Obj-Property</button>
+      <button @click="delObj">delete-Obj-Property</button>
+      <button @click="changeArr">通过下标change-Arr-Property</button>
+    </div>
+    <script>
+      new Vue({
+        el: "#app",
+        data() {
+          return {
+            obj: {
+              count: 1,
+            },
+            arr: [1, 2, 3],
+          };
+        },
+        methods: {
+          changeObj() {
+            this.obj.count = this.obj.count + 1
+          },
+          addObj() {
+            console.log(`111`, 111)
+            // this.obj.age = 1
+            this.$set(this.obj, 'age', 2) // this.$set()
+            this.obj = {...this.obj, age: 22222} // 给obj整体赋值一个添加属性后的新的对象也是可以的
+          },
+          delObj() {
+            // delete this.obj.count
+            this.$delete(this.obj, 'age') // this.$delete()
+          },
+          changeArr() {
+            // this.arr[0] = 111
+            this.$set(this.arr, 1, 222)
+            this.$delete(this.arr, 0)
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

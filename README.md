@@ -6,6 +6,7 @@ reserve 保留 // isReserved ---> vue中 ( $ 和 _ 是保留字 )
 noop 空操作 // 常用来表示一个空函数 () => {}
 polyfill 垫片 兜底
 model 模型
+primitive 原始的
 ```
 
 ## (一) 如何调试Vue2.0源码
@@ -409,6 +410,51 @@ observer.disconnect();
   - timerFunc = () => { setTimeout(flushCallbacks, 0) }
 
 4. flushCallbacks() 执行 callbacks 队列中的所有方法
+```
+
+## (九) Vue.set 和 vm.$set，Vue.delete 和 vm.delete
+- vm.$set 是 Vue.set 的别名
+- delete 和 set 类似
+
+### (9.1) 对象不会响应式更新的情况
+- 原因：( data ) 和 ( data属性 ) 是对象时，响应式实现是通过 Object.defineProperty 实现
+- 情况：只能响应对象 ( 已有属性的修改 )，不能响应对象属性的 ( 添加 ) 和 ( 删除 )
+- 解决方案
+  - **添加**
+    - Vue.set()
+    - vm.$set()
+    - 直接给对象重新赋值一个新的对象：返回一个新的对象 Object.assign({}, this.object, 添加新的属性的对象) 或者 {...this.obj, 新添加的属性：value}
+  - **删除**
+    - Vue.delete()
+    - vm.$delete()
+
+### (9.2) 数组不会响应式更新的情况
+- 不响应的情况
+  - 直接通过下表修改数组成员的值 arr[0] = 1000
+  - 直接修改数组的长度 arr.length = 1000
+- 解决方案
+  - 1. 利用重写的数组的7种方法：push pop unshift shift splice sort reverse
+  - 2. **添加，修改**: Vue.set(), vm.$set(), splice
+  - 3. **删除**：Vue.delete(), vm.$delete(), splice
+
+### (9.3) Vue.set() 源码主流程
+```
+Vue.set(this.obj, 'b', 2)
+
+1. 当obj是undefined,null,基本类型数据时，抛出警告，即响应式对象必须是 ( 数组 或 对象 )
+
+2. 处理数组：
+  - 修改，添加，删除都通过重写后的 target.splice(key, 1, val) 来完成
+  - 将要处理的目标值构造成数组，通过ob.observeArray(inserted)继续观察，然后 ob.dep.notify() 手动派发更新，然修改的值反应在DOM上
+
+3. 响应式处理对象 - ( 即 value.ob = observer 存在 )
+  - 就是 defineReactive(ob.value, key, val) 对新添加的对象属性新建立响应式
+  - 然后 ob.dep.notify() 手动通知变化后更新
+    - 因为在访问时已经对data的子对象obj做了 let childOb = !shallow && observe(val) ---> childOb.dep.depend()
+    - 所以render watcher 订阅了 obj 的dep，obj变化就能通过到渲染watcher重新渲染
+
+4. 普通的非响应式对象
+  - 直接赋值
 ```
 
 # Xmind
