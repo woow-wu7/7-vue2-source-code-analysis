@@ -60,7 +60,7 @@ export default class Watcher {
     if (options) {
       this.deep = !!options.deep
       this.user = !!options.user
-      this.lazy = !!options.lazy
+      this.lazy = !!options.lazy // 是 computed watcher 时，lazy=true
       this.sync = !!options.sync
       this.before = options.before
     } else {
@@ -70,7 +70,7 @@ export default class Watcher {
     this.cb = cb // 第三个参数，当mount阶段时，cb是一个noop空函数
     this.id = ++uid // uid for batching
     this.active = true
-    this.dirty = this.lazy // for lazy watchers
+    this.dirty = this.lazy // for lazy watchers，是 computed watcher 时，lazy=true
     this.deps = []
     this.newDeps = []
     this.depIds = new Set()
@@ -82,7 +82,7 @@ export default class Watcher {
     // 1 expOrFn 是一个函数
     if (typeof expOrFn === 'function') {
       // 如果传入 Watcher 构造函数的 ( 第二个参数expOrFn是一个函数 )
-      this.getter = expOrFn
+      this.getter = expOrFn // computedWatcher时，expOrFn是computed对象中的每个方法
     } else {
       // 2 expOrFn 是一个表达式
       this.getter = parsePath(expOrFn)
@@ -97,7 +97,7 @@ export default class Watcher {
       }
     }
     this.value = this.lazy
-      ? undefined
+      ? undefined // computed不会立即求值，computedWatcher的lazy=true；this.value = undefined
       : this.get()
   }
 
@@ -222,10 +222,11 @@ export default class Watcher {
   /**
    * Evaluate the value of the watcher.
    * This only gets called for lazy watchers.
+   * 计算watcher中的this.value，只用于lazy属性的watcher，即 computedWatcher
    */
   evaluate () {
-    this.value = this.get()
-    this.dirty = false
+    this.value = this.get() // watcher.get()会执行 ---> this.getter() ---> computedWatcher的getter是 expOrFn，即computed对象中的方法
+    this.dirty = false // 计算完成后 dirty设置为false
   }
 
   /**
@@ -234,7 +235,7 @@ export default class Watcher {
   depend () {
     let i = this.deps.length
     while (i--) {
-      this.deps[i].depend()
+      this.deps[i].depend() // 执行所有 watcher.deps 中的 dep.depend() 方法
     }
   }
 

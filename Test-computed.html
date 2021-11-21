@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <p>count -> {{count}}</p>
+      <p>计算属性computedCount=count*2 -> {{computedCount}}</p>
+
+      <button @click="add">add count</button>
+    </div>
+    <script>
+      new Vue({
+        el: "#app",
+        data() {
+          return {
+            count: 1,
+          };
+        },
+        computed: {
+          computedCount() {
+            return this.count * 2
+          }
+        },
+        methods: {
+          add() {
+            this.count = this.count + 1
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

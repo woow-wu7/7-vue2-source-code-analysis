@@ -7,6 +7,7 @@ noop 空操作 // 常用来表示一个空函数 () => {}
 polyfill 垫片 兜底
 model 模型
 primitive 原始的
+internal 内部的
 ```
 
 ## (一) 如何调试Vue2.0源码
@@ -456,6 +457,26 @@ Vue.set(this.obj, 'b', 2)
 4. 普通的非响应式对象
   - 直接赋值
 ```
+
+## (十) computed
+- 初始化
+  - new Vue() -> this.init() -> initState() -> initComputed()
+- 如何判断一个Watcher是一个 computedWatcher
+  - 通过 new Watcher(vm, getter, noop, computedWatcherOptions) 中的最后一个参数配置对象 {lazy:true} 来判断
+- 注意点
+  - 结果：computed初始化时，不会立即求值，而是要被访问的时候才会去求值
+  - 原因：new Watcher() 时，会根据lazy=true的话，就不会执行 watcher.get()
+  - 什么时才去计算：
+    - 因为在初始化时，会对computed对象定义成响应式对象
+    - computed对象中的每个属性都会进行如下流程Object.defineProperty(vm, computed中的key, sharedPropertyDefinition)
+    - sharedPropertyDefinition -> watcher.evaluate() -> this.get() -> pushTarget(this) -> this.getter -> computed对象中的方法执行，因为依赖了(data, computed) 等，又会走data的依赖收集和派发更新流程
+- 总结
+  - 1. **computed计算属性只有在computed被访问时，才会去计算**
+  - 2. **computed计算属性具有缓存功能**
+    - dirty=true时，才会去执行watcher.evaluate() 方法
+    - 下次在访问时，依赖没有变化时，dirty=false，直接返回  watcher.value 即之前计算的值
+  - 3. **computed的依赖必须是响应式数据，不然即使依赖变化不会触发computed重新计算**
+  - 4. **computed的依赖变化了，但是computed计算的值没有变化的话，不会从新渲染**
 
 # Xmind
 - [xmind-思维导图](https://github.com/woow-wu7/7-vue2-source-code-analysis/blob/main/xmind/)

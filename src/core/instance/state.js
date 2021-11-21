@@ -290,29 +290,48 @@ export function getData (data: Function, vm: Component): any {
 
 const computedWatcherOptions = { lazy: true }
 
+// ------------------------------------------------------------------
+// initComputed
+// initComputed(vm, opts.computed)
 function initComputed (vm: Component, computed: Object) {
   // $flow-disable-line
+
   const watchers = vm._computedWatchers = Object.create(null)
+  // vm._computedWatchers
+  // - 初始化一个对象：vm._computedWatchers
+
   // computed properties are just getters during SSR
-  const isSSR = isServerRendering()
+  const isSSR = isServerRendering() // 是否是服务端渲染
 
   for (const key in computed) {
-    const userDef = computed[key]
+    const userDef = computed[key] // compute对象中的每个方法
+
     const getter = typeof userDef === 'function' ? userDef : userDef.get
+    // getter
+    // - computed对象中的属性可以是 ( function ) 或者 ( 一个对象，对象中有get，set方法 )
+    // - computed对象：{ [key: string]: Function | { get: Function, set: Function } }
+
     if (process.env.NODE_ENV !== 'production' && getter == null) {
       warn(
         `Getter is missing for computed property "${key}".`,
         vm
       )
+      // 开发环境getter不存在就抛出警告
     }
 
     if (!isSSR) {
+      // 1
       // create internal watcher for the computed property.
+      // 创建一个 computed Watcher
+      // 2
+      // watchers 就是在 initComputed 最开始的地方定义的 对象
+      // 3
+      // computed中的每一个key都会new Watcher()
       watchers[key] = new Watcher(
         vm,
-        getter || noop,
-        noop,
-        computedWatcherOptions
+        getter || noop, // computed对象中的 方法
+        noop, // computed没有回调函数
+        computedWatcherOptions // const computedWatcherOptions = { lazy: true } 配置对象，computed watcher lazy=true
       )
     }
 
@@ -321,6 +340,9 @@ function initComputed (vm: Component, computed: Object) {
     // at instantiation here.
     if (!(key in vm)) {
       defineComputed(vm, key, userDef)
+      // defineComputed
+      // defineComputed 将 computed 变成响应式
+      // vm 上没有 computed 对象中的key，就执行 defineComputed
     } else if (process.env.NODE_ENV !== 'production') {
       if (key in vm.$data) {
         warn(`The computed property "${key}" is already defined in data.`, vm)
@@ -329,22 +351,28 @@ function initComputed (vm: Component, computed: Object) {
       } else if (vm.$options.methods && key in vm.$options.methods) {
         warn(`The computed property "${key}" is already defined as a method.`, vm)
       }
+      // computed中的key不能在props，data，methods中存在，因为都会挂在vm上，会覆盖
     }
   }
 }
 
 export function defineComputed (
-  target: any,
+  target: any, // vm
   key: string,
-  userDef: Object | Function
+  userDef: Object | Function // computed中的方法，或者computed中的属性对象中的get属性
 ) {
   const shouldCache = !isServerRendering()
-  if (typeof userDef === 'function') {
+  // shouldCache
+  // - 标志位，isServerRendering表示是否是服务端渲染
+  // - shouldCache 如果在浏览器环境就是 true
+
+  //======= get
+  if (typeof userDef === 'function') { // ------------------- computed中的key是 function
     sharedPropertyDefinition.get = shouldCache
       ? createComputedGetter(key)
       : createGetterInvoker(userDef)
     sharedPropertyDefinition.set = noop
-  } else {
+  } else { // ------------------------------------------------ computed中的key是一个对象，对象中需要有get，set属性
     sharedPropertyDefinition.get = userDef.get
       ? shouldCache && userDef.cache !== false
         ? createComputedGetter(key)
@@ -352,6 +380,8 @@ export function defineComputed (
       : noop
     sharedPropertyDefinition.set = userDef.set || noop
   }
+  // ====== set
+  // computed的set一般都不会用，因为是直接做为属性访问用的
   if (process.env.NODE_ENV !== 'production' &&
       sharedPropertyDefinition.set === noop) {
     sharedPropertyDefinition.set = function () {
@@ -362,19 +392,61 @@ export function defineComputed (
     }
   }
   Object.defineProperty(target, key, sharedPropertyDefinition)
+  // 定义响应式 computed
+  // 将 computed 对象定义成响应式对象
+  // - 当访问 computed 中的 key 时，会执行sharedPropertyDefinition中的get方法
+  // - 即 createComputedGetter() 或者 createComputedGetter() 执行的返回值
 }
 
+// 真正computed被访问到时，执行的函数是 computedGetter
 function createComputedGetter (key) {
   return function computedGetter () {
+
     const watcher = this._computedWatchers && this._computedWatchers[key]
+    // watcher
+    // 1. const watchers = vm._computedWatchers = Object.create(null)
+    // 2. watchers[key] = new Watcher()
+    // 3. 结论：通过1和2，得出 vm._computedWatchers[key] 可以访问到 new Watcher()
+    // 4. 原因：
+    //  - 因为 watchers 和 this._computedWatchers 是都变量
+    //  - vm._computedWatchers 是一个引用类型
+    //  - watchers[key] 也是一个引用类型
+    //  - watchers[key] 和 vm._computedWatchers[key] 都指向了 watcher 实例
+
     if (watcher) {
       if (watcher.dirty) {
+        // computed watcher 的初始化时 dirty=true
+        // 注意：dirty是动态在修改的，evaluate之前是true，evaluate之后该为false
+        // 1. 默认初始化时，computed watcher 的 dirty=true
+        // 2. 当 dirty=true 就会执行 watcher.evaluate()
+        // 3. watcher.evaluate() 执行完后， dirty=false
+        // 总结：  dirty=true => watcher.evaluate() => dirty=false
+
         watcher.evaluate()
+        // watcher.evaluate()
+        // 1. 会去执行 computed watcher 中的 get()
+            // pushTarget(this)
+              // 1. 将 computed watcher 添加到  targetStack 数组队列中
+              // 2. 将 Dep.target = computed watcher
+              // 执行 this.getter.call(vm, vm) 即用户自定义的 computed对象中的方法
+                // 1. 列如： computed: {newName() {return this.name + 'new' }}
+                // 2. 因为：computed的newName方法中，依赖了data中的this.name，即访问到了this.name就会触发data响应式的get方法
+                // 3. 所以：data响应式的get方法执行过程如下
+                    // 首先，获取到了this.name的值
+                    // 此时，Dep.target 是computed watcher
+                    // 然后，执行this.name对象的dep类的depend方法进行依赖收集
+                    // 向 computed watcher 的newDeps中添加render watcher的dep
+                    // 向 render watcher 的对应的Dep类中的 subs 中添加 computed watcher
+                    // ！！！！ 等于说data的 this.name 和 computed Watcher 具有同一个 dep 实例
+            //  popTarget()
+              // 1. targetStack.pop() 将 computed watcher从targetStack数组中删除
+              // 2. 并且将 Dep.target 指定为数组中的前一个 watcher，没有了就是undefined
+        // 2. 将 dirty=false
       }
-      if (Dep.target) {
+      if (Dep.target) { // 正在执行的watcher，是渲染watcher
         watcher.depend()
       }
-      return watcher.value
+      return watcher.value // 计算的结果，evaluate() 方法中计算了value的值
     }
   }
 }
