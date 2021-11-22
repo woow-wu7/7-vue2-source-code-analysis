@@ -84,6 +84,11 @@ export default class Watcher {
       ? expOrFn.toString()
       : ''
     // parse expression for getter
+
+    // expOrFn
+    // - 1. 函数：renderWatcher 和 computedWatcher 的 expOrFn 是一个函数
+    // - 2. 字符串：userWatcher 的 expOrFn 是一个字符串
+
     // 1 expOrFn 是一个函数
     if (typeof expOrFn === 'function') {
       // 如果传入 Watcher 构造函数的 ( 第二个参数expOrFn是一个函数 )
