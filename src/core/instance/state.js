@@ -485,33 +485,52 @@ function initMethods (vm: Component, methods: Object) {
   }
 }
 
+// initWatch
+// - initWatch(vm, opts.watch)
 function initWatch (vm: Component, watch: Object) {
   for (const key in watch) {
+
     const handler = watch[key]
-    if (Array.isArray(handler)) {
+    // handler
+    // - 获取watcher对象中的key对应的数据
+    // - handler可的类型：
+    //    - function string array object
+    //    - 是object时，属性有 handler，deep，immediate，sync
+
+    if (Array.isArray(handler)) { // ------------------ handler是数组
       for (let i = 0; i < handler.length; i++) {
         createWatcher(vm, key, handler[i])
       }
+    // ------------------------------------------------ handler是对象，字符串，函数
     } else {
       createWatcher(vm, key, handler)
+      // key -----> watch对象中的key
+      // handler -> watch对象中的value
     }
   }
 }
 
 function createWatcher (
   vm: Component,
-  expOrFn: string | Function,
-  handler: any,
+  expOrFn: string | Function, // watch.key
+  handler: any, // watch.value
   options?: Object
 ) {
-  if (isPlainObject(handler)) {
-    options = handler
-    handler = handler.handler
+  if (isPlainObject(handler)) { // ------------------- handler是对象，纯对象 ( 对象字面量 或 Object.create() )
+    options = handler // 将handler对象赋值给options
+    handler = handler.handler // handler是对象时，一定要有一个handler属性，表示watch时需要执行的回调
   }
-  if (typeof handler === 'string') {
+  if (typeof handler === 'string') { // -------------- handler是一个string
     handler = vm[handler]
+    // 当handler是一个string时
+    //  - 1. handler代表的是一个methods，methods中的每个方法都已经挂在到vm上了，所以可以直接获取 vm[handler]
+    //  - 2. vm[handler] 其实就是访问到了 methods 中的方法
   }
+  // 经过上面的处理后， handler 都已经处理成了一个 function
   return vm.$watch(expOrFn, handler, options)
+  // expOrFn -> key
+  // handler -> value -> handler都已经处理成了一个函数
+  // vm.$watch 在该文件的最底部位置定义的
 }
 
 export function stateMixin (Vue: Class<Component>) {
@@ -540,24 +559,35 @@ export function stateMixin (Vue: Class<Component>) {
   Vue.prototype.$set = set
   Vue.prototype.$delete = del
 
+  // $watch
+  // expOrFn -> key
+  // cb -> handler -> value
   Vue.prototype.$watch = function (
-    expOrFn: string | Function,
-    cb: any,
+    expOrFn: string | Function, // key
+    cb: any, // handler function
     options?: Object
   ): Function {
     const vm: Component = this
+
     if (isPlainObject(cb)) {
       return createWatcher(vm, expOrFn, cb, options)
+      // 是一个对象，再调用 createWatcher 函数将 cb 处理成 function
+      // 问题：为什么 cb 还能是对象呢？我们在 createWatcher 函数中不是都把 handler 处理成 function 了吗？
+      // 回答：是因为可以直接通过 this.$watch({...}) 出入一个对象
     }
+
     options = options || {}
     options.user = true
-    const watcher = new Watcher(vm, expOrFn, cb, options)
+    const watcher = new Watcher(vm, expOrFn, cb, options) // user=true，说明是一个 userWatcher，即用来出来 watch 相关的逻辑
+
+    // immediate 表示立即执行 watch 中的 handler 函数
     if (options.immediate) {
       const info = `callback for immediate watcher "${watcher.expression}"`
       pushTarget()
       invokeWithErrorHandling(cb, vm, [watcher.value], vm, info)
       popTarget()
     }
+
     return function unwatchFn () {
       watcher.teardown()
     }

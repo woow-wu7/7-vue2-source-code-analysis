@@ -59,8 +59,8 @@ export default class Watcher {
     // options
     if (options) {
       this.deep = !!options.deep
-      this.user = !!options.user
-      this.lazy = !!options.lazy // 是 computed watcher 时，lazy=true
+      this.user = !!options.user // 是 user watcher 时，user=true，处理 watch 的逻辑
+      this.lazy = !!options.lazy // 是 computed watcher 时，lazy=true，处理 computed 的逻辑
       this.sync = !!options.sync
       this.before = options.before
     } else {
@@ -84,8 +84,42 @@ export default class Watcher {
       // 如果传入 Watcher 构造函数的 ( 第二个参数expOrFn是一个函数 )
       this.getter = expOrFn // computedWatcher时，expOrFn是computed对象中的每个方法
     } else {
-      // 2 expOrFn 是一个表达式
+      // 2 expOrFn 是一个字符串 -> 是一个字符串时，可能是一个 user watcher
+
       this.getter = parsePath(expOrFn)
+      // this.getter 在 this.get() 方法中执行
+      // parsePath
+      // - 返回的是一个函数，该函数遍历expOrFn分割后的数组
+      // - 返回的函数是：return function (obj) { for (let i = 0; i < segments.length; i++) { if (!obj) return obj = obj[segments[i]] } return obj }
+      //    - 返回的函数的参数：obj -> 其实就是 vm 实例
+      //    - obj[segments[i]] 其实就是访问到了 data 中的属性，
+      // 1
+      // path.split('.')
+      // 比如 watch 对象中有这样的情况
+      //  'a.b'
+      //    - { 'a.b': function(newValue, oldValue){...} }
+      //    - ['a', 'b']
+      //  'c'
+      //    - ['c']
+
+
+      // 2
+      // export function parsePath (path: string): any {
+      //   if (bailRE.test(path)) {
+      //     return
+      //   }
+      //   const segments = path.split('.')
+      //   return function (obj) {
+      //     for (let i = 0; i < segments.length; i++) {
+      //       if (!obj) return
+      //       obj = obj[segments[i]]
+      //     }
+      //     return obj
+      //   }
+      // }
+      // const bailRE = new RegExp(`[^${unicodeRegExp.source}.$_\\d]`)
+
+
       if (!this.getter) {
         this.getter = noop
         process.env.NODE_ENV !== 'production' && warn(
@@ -98,7 +132,7 @@ export default class Watcher {
     }
     this.value = this.lazy
       ? undefined // computed不会立即求值，computedWatcher的lazy=true；this.value = undefined
-      : this.get()
+      : this.get() // render watcher 和 user watcher 初始化时都会执行 this.get()
   }
 
   /**
@@ -111,6 +145,9 @@ export default class Watcher {
     try {
       value = this.getter.call(vm, vm)
       // 执行getter()，传入vm作为参数，求值
+      // render Watcher 和 user watcher 都会执行 this.getter
+      // - render watcher 的 getter 是 -----> updateComponent = () => { vm._update(vm._render(), hydrating) }
+      // - user watcher 的 getter 是 -------> watcher对象中的 handler方法，即watch对象中执行的函数；并且当我们访问watcher中的属性，比如叫a字符串时，会访问 vm.a 就是对data进行访问，就会触发dep.depend()做依赖收集
     } catch (e) {
       if (this.user) {
         handleError(e, vm, `getter for watcher "${this.expression}"`)

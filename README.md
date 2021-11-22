@@ -478,6 +478,26 @@ Vue.set(this.obj, 'b', 2)
   - 3. **computed的依赖必须是响应式数据，不然即使依赖变化不会触发computed重新计算**
   - 4. **computed的依赖变化了，但是computed计算的值没有变化的话，不会从新渲染**
 
+## (十一) watch
+- 支持的语法
+  - **vm.$watch**
+  - **watch对象** options中定义的watch对象
+- watch对象中的key的类型
+  - function
+  - string
+  - array
+  - object
+    - handler
+    - deep
+    - immediate
+    - sync
+    - 最终都会把不同类型的 handler 转换成函数
+    - 必须要有 handler 属性
+- 可能的死循环
+  - watch: { count: {this.count = this.count + 1}}
+  - watch了count，count变化执行watch，watch执行又改变了count，count变化继续执行watch，死循环
+  - count变化 -> watcherHandler() -> 修改count -> count变化 -> watcherHandler()
+
 # Xmind
 - [xmind-思维导图](https://github.com/woow-wu7/7-vue2-source-code-analysis/blob/main/xmind/)
 # 资料

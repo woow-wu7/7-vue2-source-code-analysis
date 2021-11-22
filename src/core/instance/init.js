@@ -55,10 +55,19 @@ export function initMixin (Vue: Class<Component>) {
     initLifecycle(vm)
     initEvents(vm)
     initRender(vm)
+
+    // beforeCreate()
+    // -------------------------------------- beforeCreate 生命周期钩子函数
+    // - 在beforeCreate中是不能获取到vm上的属性的，因为initState还没有执行，获取不到props，methods，data, computed，watch等属性的
+    // - vueRouter vueMixin 可以获得
     callHook(vm, 'beforeCreate')
+
     initInjections(vm) // resolve injections before data/props
     initState(vm) // initState
     initProvide(vm) // resolve provide after data/props
+
+    // created()
+    // ------------------------------------- created 生命周期钩子函数
     callHook(vm, 'created')
 
     /* istanbul ignore if */

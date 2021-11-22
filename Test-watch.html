@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <p>count: {{count}}</p>
+      <p>watchedCount: {{watchedCount}}</p>
+
+      <button @click="add">change count</button>
+    </div>
+    <script>
+      new Vue({
+        el: "#app",
+        data() {
+          return {
+            count: 1,
+            watchedCount: 1,
+          };
+        },
+        watch: {
+          'count': function(newValue, oldValue) {
+            this.watchedCount = newValue
+          }
+        },
+        methods: {
+          add() {
+            this.count = this.count + 1
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
