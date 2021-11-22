@@ -12,18 +12,18 @@ const seenObjects = new Set()
  * is collected as a "deep" dependency.
  */
 export function traverse (val: any) {
-  _traverse(val, seenObjects)
+  _traverse(val, seenObjects) // const seenObjects = new Set()
   seenObjects.clear()
 }
 
 function _traverse (val: any, seen: SimpleSet) {
   let i, keys
-  const isA = Array.isArray(val)
+  const isA = Array.isArray(val) // 数组
   if ((!isA && !isObject(val)) || Object.isFrozen(val) || val instanceof VNode) {
     return
   }
   if (val.__ob__) {
-    const depId = val.__ob__.dep.id
+    const depId = val.__ob__.dep.id // 循环访问
     if (seen.has(depId)) {
       return
     }

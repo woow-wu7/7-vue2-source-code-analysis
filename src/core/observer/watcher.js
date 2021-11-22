@@ -67,7 +67,12 @@ export default class Watcher {
       this.deep = this.user = this.lazy = this.sync = false
       // options 不存在时，默认都设置为 false
     }
-    this.cb = cb // 第三个参数，当mount阶段时，cb是一个noop空函数
+
+    this.cb = cb
+    // 第三个参数
+    // - render watcher -> mount阶段，cb是一个noop空函数
+    // - user watcher -> mount阶段，cb是一个函数，即watch对象中的key对象的handler函数
+
     this.id = ++uid // uid for batching
     this.active = true
     this.dirty = this.lazy // for lazy watchers，是 computed watcher 时，lazy=true
@@ -84,8 +89,8 @@ export default class Watcher {
       // 如果传入 Watcher 构造函数的 ( 第二个参数expOrFn是一个函数 )
       this.getter = expOrFn // computedWatcher时，expOrFn是computed对象中的每个方法
     } else {
-      // 2 expOrFn 是一个字符串 -> 是一个字符串时，可能是一个 user watcher
-
+      // 2 expOrFn 是一个字符串
+      //   -> 是一个字符串时，可能是一个 user watcher
       this.getter = parsePath(expOrFn)
       // this.getter 在 this.get() 方法中执行
       // parsePath
@@ -157,8 +162,8 @@ export default class Watcher {
     } finally {
       // "touch" every property so they are all tracked as
       // dependencies for deep watching
-      if (this.deep) {
-        traverse(value)
+      if (this.deep) { // deep用于深层对象的watch
+        traverse(value) // 传入计算的结果值
       }
       popTarget() // 出栈
       this.cleanupDeps()

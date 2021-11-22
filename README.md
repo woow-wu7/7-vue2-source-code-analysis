@@ -8,6 +8,7 @@ polyfill 垫片 兜底
 model 模型
 primitive 原始的
 internal 内部的
+recursive 递归
 ```
 
 ## (一) 如何调试Vue2.0源码
@@ -487,16 +488,49 @@ Vue.set(this.obj, 'b', 2)
   - string
   - array
   - object
-    - handler
-    - deep
-    - immediate
-    - sync
+    - **handler**
+    - **deep**
+      - deep深度监听深层对象属性的变化，递归访问做依赖收集
+    - **immediate**
+      - immediate立即执行
+    - **sync：**
+      - sync的watch优先执行
     - 最终都会把不同类型的 handler 转换成函数
     - 必须要有 handler 属性
 - 可能的死循环
   - watch: { count: {this.count = this.count + 1}}
   - watch了count，count变化执行watch，watch执行又改变了count，count变化继续执行watch，死循环
   - count变化 -> watcherHandler() -> 修改count -> count变化 -> watcherHandler()
+
+### (11.1) watch 源码的 ( 初始化 ) 流程梳理
+```
+1
+new Vue() -> this._init() -> initState() -> initWatch()
+
+
+2
+initWatch() -> createWatcher() -> vm.$watch()
+- 处理watch对象中的key对应的不同value类型，value的类型可以是下面的几种
+  - function
+  - string：表示method
+  - object：具有 handler，deep，immediate，sync 属性
+  - array：array的成员可以是上面三种，比如 [string, object, function]
+
+
+3
+vm.$watch() -> new Watcher() -> this.get() -> this.getter()
+- new Watcher(vm, expOrFn=watch.key, cb=watch.value, { user: true})
+  - 实例化一个 user watcher，user watcher的特点是配置对象中的 user=true；注意如果handler是对象，对象中的属性也会在这个对象中，比如deep,immediate,sync
+  - this.getter = parsePath(expOrFn) = function (obj) { for (let i = 0; i < segments.length; i++) { obj = obj[segments[i]] } return obj }
+  - this.get() -> 会执行 this.getter() -> 然后就会访问到vm[key] -> 执行watch对象中的handler函数
+    - key就是watch对象中的每一个key，这个key其实就是data中的属性
+    - 访问到data属性就会走依赖收集的流程即dep.depend()
+    - 注意：这里是user watcher订阅的data属性的dep，也就是说data属性变化时，除了renderWatcher外，userWatcher也会执行，因为userWatcher也订阅了data的属性的变化
+```
+### (11.2) watch 源码的 ( 更新 ) 流程梳理
+- 更新流程其实很简单，就是走 dep.notify()
+- 注意：watch的是data，data变化时，其实是有renderWatcher和userWatcher订阅了data数据的变化，所以都会执行并计算
+
 
 # Xmind
 - [xmind-思维导图](https://github.com/woow-wu7/7-vue2-source-code-analysis/blob/main/xmind/)

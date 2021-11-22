@@ -578,6 +578,9 @@ export function stateMixin (Vue: Class<Component>) {
 
     options = options || {}
     options.user = true
+    // options
+    // - 注意：如果watch对象中属性对应的是一个对象时，对象中的属性会合并到options中
+
     const watcher = new Watcher(vm, expOrFn, cb, options) // user=true，说明是一个 userWatcher，即用来出来 watch 相关的逻辑
 
     // immediate 表示立即执行 watch 中的 handler 函数

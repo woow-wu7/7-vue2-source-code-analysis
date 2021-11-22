@@ -31,6 +31,9 @@ export function def (obj: Object, key: string, val: any, enumerable?: boolean) {
  * Parse simple path.
  */
 const bailRE = new RegExp(`[^${unicodeRegExp.source}.$_\\d]`)
+
+// parsePath
+// - 返回值：是一个函数，这个函数的返回值就是data中的属性对应的值
 export function parsePath (path: string): any {
   if (bailRE.test(path)) {
     return
