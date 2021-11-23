@@ -96,6 +96,7 @@ typeof 返回的数据类型，一共有 7 种
 - 包括自身，即 Function.__proto__ === Function.prototype
 2.2 函数的prototype
 - 所有 ( 函数的prototype )，都是大写的 ( Object.prototype ) 的实例
+- 除了Object，即 Object.prototype === null
 2.3 案例
 - 2.3.1
 Function.__proto__ === Function.prototype 所有的函数都是Function.prototype对象的实例
