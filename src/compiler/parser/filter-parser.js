@@ -2,14 +2,15 @@
 
 const validDivisionCharRE = /[\w).+\-_$\]]/
 
+// parseFilters
 export function parseFilters (exp: string): string {
-  let inSingle = false
-  let inDouble = false
-  let inTemplateString = false
-  let inRegex = false
-  let curly = 0
-  let square = 0
-  let paren = 0
+  let inSingle = false // 当前字符是否在 ' 单引号中的标识
+  let inDouble = false // 当前字符是否在 " 双引号中的标识
+  let inTemplateString = false  // 当前字符是否在 ` es6 模板的标识
+  let inRegex = false // 当前字符是否在 / 正则中的标识
+  let curly = 0 // 匹配到 { +1 匹配到 } -1
+  let square = 0 // 匹配到 [ +1 匹配到 ] -1
+  let paren = 0  // 匹配到 ( +1 匹配到 ) -1
   let lastFilterIndex = 0
   let c, prev, i, expression, filters
 

@@ -16,4 +16,5 @@ import { identity, resolveAsset } from 'core/util/index'
  */
 export function resolveFilter (id: string): Function {
   return resolveAsset(this.$options, 'filters', id, true) || identity
+  // resolveAsset 函数主要用来处理 Vue 实例内部的 directives、 components 、filters
 }
