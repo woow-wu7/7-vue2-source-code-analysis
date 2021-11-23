@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      const VueChildClass = Vue.extend({
+        data() {
+          return {
+            count: 1,
+          };
+        },
+        template: `
+          <p>{{count}}</p>
+        `,
+      });
+      new VueChildClass().$mount('#app')
+      // 1. 通过 Vue.extend() 生成子类
+      // 2. 再通过 new调用子类，生成实例vm后，调用 vm.$mount() 挂载到DOM上
+
+      // Vue.extend() 的作用就是调用Vue构造起，生成”子类“
+    </script>
+  </body>
+</html>

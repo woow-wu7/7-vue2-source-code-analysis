@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app"><base-button name="BaseButton"> </div>
+    <div id="app2"><extend-button name="ExtendButton"></div>
+
+    <script>
+      // 第二个参数是一个 ( 包含组件选项的对象 )
+      const BaseButton = Vue.component('BaseButton', {
+        props: ['name'],
+        data() {
+          return {
+            count: 0
+          }
+        },
+        methods: {
+          add() {
+            this.count = this.count + 1
+          }
+        },
+        template: `
+          <div>
+            <p>{{count}}</p>
+            <p>第二个参数直接传入配置对象</p>
+            <button @click="add">{{name}}</button>
+          </div>
+        `
+      })
+      new Vue({
+        el: "#app",
+        components: {
+          'base-button': BaseButton,
+          // 'extend-button': ExtendButton
+        }
+      });
+    </script>
+
+    <script>
+      // 第二个参数通过 ( Vue.extend() ) 生成
+      // Vue.extend() 作用就是利用Vue构造器，生成 子类class
+      Vue.component('ExtendButton', Vue.extend({
+        props: ['name'],
+        data() {
+          return {
+            count2: 0
+          }
+        },
+        methods: {
+          add() {
+            this.count2 = this.count2 + 1
+          }
+        },
+        template: `
+          <div>
+            <p>{{count2}}</p>
+            <p>第二个参数通过Vue.extend()生成</p>
+            <button @click="add">{{name}}</button>
+          </div>
+        `
+      }))
+      new Vue({
+        el: "#app2",
+      });
+    </script>
+  </body>
+</html>

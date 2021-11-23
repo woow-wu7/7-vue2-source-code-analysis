@@ -535,6 +535,79 @@ vm.$watch() -> new Watcher() -> this.get() -> this.getter()
 - 注意：watch的是data，data变化时，其实是有renderWatcher和userWatcher订阅了data数据的变化，所以都会执行并计算
 
 
+## (十二) Vue.extend
+
+### (12.1) Vue.component() 全局注册
+- 组件注册分为 全局注册 和 局部注册
+  - **全局注册**：Vue.component()
+  - **局部注册**：在 new Vue({components: {}|[]}) 时，通过 components 属性进行注册
+- Vue.component 作用
+  - 注册和获取全局组件
+  - 组件是可复用的Vue实例，且带有一个名字，就是传入Vue.component的第一个参数id
+- Vue.component( id, [definition] )
+  - {string} **id** ------------------------- 组件名字
+  - {Function | Object} **[definition]** ---- 和new Vue(options) 中的 options 具有相同的属性
+```
+Vue.component('my-component', Vue.extend({})) // --------- 注册组件，传入一个扩展过的构造器，使用Vue.extend()
+Vue.component('my-component', {}) // --------------------- 注册组件，传入一个选项对象 (内部会自动调用 Vue.extend)
+var MyComponent = Vue.component('my-component') // ------- 获取组件，获取注册的组件 (始终返回构造器)
+```
+
+### (12.2) Vue.component 如何使用
+```<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <base-button name="BaseButton">
+    </div>
+    <script>
+      Vue.component('BaseButton', {
+        props: ['name'],
+        data() {
+          return {
+            count: 0
+          }
+        },
+        methods: {
+          add() {
+            this.count = this.count + 1
+          }
+        },
+        template: `
+          <div>
+            <p>{{count}}</p>
+            <button @click="add">{{name}}</button>
+          </div>
+        `
+      })
+      new Vue({
+        el: "#app",
+      });
+    </script>
+  </body>
+</html>
+```
+
+### (12.3) Vue.extend()
+- 作用
+  - 使用基础 Vue 构造器，创建一个 **子类**
+  - 注意是 ( **子类** )，而不是 ( 实例 )
+  - 其实从名字就知道是继承，class的继承，子类可以通过 new 来调用
+- 语法
+  - Vue.extend( options )
+  - 参数
+    - {Object} options 一个包含组件选项的对象
+    - **data属性是特例，注意在 Vue.extend({data(){return {...}}}) 中 data属性必须是一个函数**
+    - **Vue.component() 和 Vue.extend() 的参数对象中的 data 都必须是一个 函数**
+
+
 # Xmind
 - [xmind-思维导图](https://github.com/woow-wu7/7-vue2-source-code-analysis/blob/main/xmind/)
 # 资料
