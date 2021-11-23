@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <p>typeof count: {{count | countToString}}</p>
+      <p>double count: {{count | countDouble}}</p>
+      <p>
+        filterParams: {{count | countParams('age实参', 'address实参') |
+        countParams2('sex') }}
+      </p>
+
+      <button @click="add">add</button>
+      <button @click="getGlobalFilter">getGlobalFilter</button>
+    </div>
+    <div id="app2"></div>
+    <script>
+      // -------------- 全局filter
+      Vue.filter("countDouble", function (value) {
+        return value * value;
+      });
+
+      new Vue({
+        el: "#app",
+        data() {
+          return {
+            count: 1,
+          };
+        },
+        // ------------ 组件filter
+        filters: {
+          countToString(value) {
+            return typeof String(value);
+          },
+          countParams(value, age, params) {
+            // 第一个参数：是 ｜ 前的data属性值
+            // 第二个参数 和 第三个 参数在template中调用时传入
+            return value + age + params;
+          },
+          // filter 过滤器可以串联
+          countParams2(value2, sex) {
+            return value2 + sex;
+          },
+        },
+        methods: {
+          add() {
+            this.count = this.count + 1;
+          },
+          getGlobalFilter() {
+            const countDouble = Vue.filter("countDouble")();
+            console.log(`countDouble`, countDouble);
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

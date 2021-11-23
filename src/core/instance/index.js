@@ -20,6 +20,6 @@ initMixin(Vue) // 在该函数中声明了 _init 方法
 stateMixin(Vue)
 eventsMixin(Vue)
 lifecycleMixin(Vue)
-renderMixin(Vue)
+renderMixin(Vue) // filter 在 renderMixin() -> installRenderHelpers() 中初始化
 
 export default Vue

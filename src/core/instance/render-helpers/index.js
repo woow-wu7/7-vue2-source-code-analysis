@@ -12,6 +12,9 @@ import { bindObjectListeners } from './bind-object-listeners'
 import { resolveScopedSlots } from './resolve-scoped-slots'
 import { bindDynamicKeys, prependModifier } from './bind-dynamic-keys'
 
+// installRenderHelpers
+// 参数
+//  - target：是 Vue.prototype
 export function installRenderHelpers (target: any) {
   target._o = markOnce
   target._n = toNumber
@@ -21,7 +24,10 @@ export function installRenderHelpers (target: any) {
   target._q = looseEqual
   target._i = looseIndexOf
   target._m = renderStatic
+
   target._f = resolveFilter
+  // filter相关 -> Vue.prototype._f = function(id: string) { return resolveAsset(this.$options, 'filters', id, true) || identity }
+
   target._k = checkKeyCodes
   target._b = bindObjectProps
   target._v = createTextVNode

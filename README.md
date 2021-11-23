@@ -10,6 +10,8 @@ primitive 原始的
 internal 内部的
 recursive 递归
 teardown 拆卸
+
+camel 骆驼
 ```
 
 ## (一) 如何调试Vue2.0源码
@@ -607,6 +609,16 @@ var MyComponent = Vue.component('my-component') // ------- 获取组件，获取
     - {Object} options 一个包含组件选项的对象
     - **data属性是特例，注意在 Vue.extend({data(){return {...}}}) 中 data属性必须是一个函数**
     - **Vue.component() 和 Vue.extend() 的参数对象中的 data 都必须是一个 函数**
+
+## (十三) Vue.filter()
+- 全局的 和 组件配置对象中的filters
+- 详见 Test-filter.html
+
+### (13.1) 驼峰命名CamelCase 和 帕斯卡命名pascalCase
+- **驼峰命名(CamelCase)**
+  - myFirstName、myLastName
+- **帕斯卡命名(PascalCase)**
+  - MyFirstName、MyLastName
 
 
 # Xmind

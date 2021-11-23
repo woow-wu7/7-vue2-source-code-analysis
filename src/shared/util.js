@@ -149,22 +149,51 @@ export function hasOwn (obj: Object | Array<*>, key: string): boolean {
 
 /**
  * Create a cached version of a pure function.
+ * 纯函数，相同的输入总能得到相同的输出
  */
 export function cached<F: Function> (fn: F): F {
   const cache = Object.create(null)
   return (function cachedFn (str: string) {
     const hit = cache[str]
     return hit || (cache[str] = fn(str))
+    // 1. 第一层函数：cached(fn)
+    // 2. 第二次函数 cachedFn(str)
+    // 整个逻辑表示：
+    //  - 如果 cache缓存对象中 str 存在，就直接返回 ---- 其实 cache[str]是一个函数，因为初始时不存在会执行 cache[str] = fn(str)
+    // 最终的功能
+    //  - 就是缓存函数参数，如果参数之前传过，会返回之前该参数计算的结果值
   }: any)
 }
 
+
+
+// 1
+// \w
+// \w 匹配任意字母，数字，下划线，相当于相当于 [A-Za-z0-9_]
+// 2
+// replace
+// - replace方法的第二个参数还可以是一个函数，将每一个匹配内容替换为函数返回值
+// - 作为replace方法第二个参数的替换函数，可以接受多个参数
+//    - 第一个参数：是捕捉到的内容
+//    - 第二个参数：是捕捉到的组匹配（有多少个组匹配，就有多少个对应的参数）
+// var a = 'The quick brown fox jumped over the lazy dog.';
+// var pattern = /quick|brown|lazy/ig;
+// a.replace(pattern, function replacer(match) {
+//   return match.toUpperCase(); // 将全局忽略大小匹配到的内容转成大写
+// });
 /**
  * Camelize a hyphen-delimited string.
  */
+// // The QUICK BROWN fox jumped over the LAZY dog.
 const camelizeRE = /-(\w)/g
 export const camelize = cached((str: string): string => {
   return str.replace(camelizeRE, (_, c) => c ? c.toUpperCase() : '')
+  // c 表示组匹配，即匹配到 (\w) 这个组
+  // 总的作用就是：将 aa-bb 这样的写法转成 aa-Bb 驼峰写法
 })
+
+
+
 
 /**
  * Capitalize a string.
@@ -266,6 +295,8 @@ export const no = (a?: any, b?: any, c?: any) => false
 
 /**
  * Return the same value.
+ * 直接返回参数
+ * identity 有一致的意思
  */
 export const identity = (_: any) => _
 

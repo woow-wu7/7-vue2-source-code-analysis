@@ -439,6 +439,8 @@ export function mergeOptions (
  * This function is used because child instances need access
  * to assets defined in its ancestor chain.
  */
+// resolveAsset
+// resolveAsset(this.$options, 'filters', id, true)
 export function resolveAsset (
   options: Object,
   type: string,
@@ -449,13 +451,39 @@ export function resolveAsset (
   if (typeof id !== 'string') {
     return
   }
-  const assets = options[type]
+  const assets = options[type] // 1. options.filter
+
   // check local registration variations first
+  // hasOwn 用来判断是否是自身属性，区别于继承的属性
+  // 这个if语句，表示filter是否已经注册过，如果注册过直接返回这个filter
   if (hasOwn(assets, id)) return assets[id]
+
+
   const camelizedId = camelize(id)
+  // camelizedId
+  // 将 aa-bb 的id转成驼峰写法，即aa-Bb
+  // ------------------------------ CamelCase 驼峰命名 myFirstName、myLastName
+
+  // camelize
+  /**
+   * Camelize a hyphen-delimited string.
+   */
+  // const camelizeRE = /-(\w)/g
+  // export const camelize = cached((str: string): string => {
+  //   return str.replace(camelizeRE, (_, c) => c ? c.toUpperCase() : '')
+  // })
+
+
+
   if (hasOwn(assets, camelizedId)) return assets[camelizedId]
+  // 上面这个if，表示filter存在，直接返回
+
   const PascalCaseId = capitalize(camelizedId)
+  // PascalCaseId -> 首字母大写
+  // ------------------------------ PascalCase 帕斯卡命名 MyFirstName、MyLastName
+
   if (hasOwn(assets, PascalCaseId)) return assets[PascalCaseId]
+
   // fallback to prototype chain
   const res = assets[id] || assets[camelizedId] || assets[PascalCaseId]
   if (process.env.NODE_ENV !== 'production' && warnMissing && !res) {
