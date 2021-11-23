@@ -53,7 +53,7 @@ export default class Watcher {
   ) {
     this.vm = vm
     if (isRenderWatcher) { // watcher渲染watcher
-      vm._watcher = this
+      vm._watcher = this // vm._watcher 表示的就是渲染watcher
     }
     vm._watchers.push(this)
     // options

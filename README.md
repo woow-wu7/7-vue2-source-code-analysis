@@ -9,6 +9,7 @@ model 模型
 primitive 原始的
 internal 内部的
 recursive 递归
+teardown 拆卸
 ```
 
 ## (一) 如何调试Vue2.0源码
@@ -227,9 +228,11 @@ console.log(component1.data === component2.data) // false
 文档片段节点 documentFragment 11
 ```
 
-## (七) 为什么data，props，methods中的key不能相同？
+## (七) 为什么data，props，methods，computed中的key不能相同？
 - 因为vue做了一层proxy后，可以通过vm.key访问，所以不能相同，相同后不能区分
 - 在源码中就是先做了两次判断data和prop，methods中的key不能相同后，才进行proxy(vm, '_data', key)代理，把 data中的属性代理到vm上
+- 初始化的顺序是：props，methods，data，computed
+- computed中的属性同样也不能和props，methods，data中的属性一样
 
 ## (八) nextTick
 - 其实就是逐渐降级的过程
