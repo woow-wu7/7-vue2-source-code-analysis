@@ -622,6 +622,7 @@ var MyComponent = Vue.component('my-component') // ------- 获取组件，获取
 
 ## (十四) vm.$attrs 和 vm.$listeners
 - 详见 Test-attrs-listeners.html
+- HOC - decorator装饰器模式的运用 - Test-vue-hoc-debounceButton.html
 ### (14.1) vm.$attrs
 - 包含了父作用域中不作为 prop 被识别 (且获取) 的 attribute 绑定，除了 (  class 和 style )
 - 可以通过 v-bind="$attrs" 传入内部组件——在创建高级别的组件时非常有用
