@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="root">
+      <p>{{app}}</p>
+      <Son
+        name="woow_wu7"
+        age="20"
+        sex="man"
+        customAttribute="$attrs"
+        style="border: 1px solid red"
+        class="class-son"
+        v-on:custom-event-click="clickSon"
+      />
+      <!-- 自定义事件  -->
+      <!-- 1. 在Son组件上绑定一个自定义事件 v-on:custom-event-click="clickSon"  -->
+      <!-- 2. 在Grandson组件上通过 v-on="$listeners" 传给Grandson内部  -->
+    </div>
+    <script>
+      // Grandson
+      const Grandson = Vue.component("Grandson", {
+        data() {
+          return {
+            grandson: "grandson",
+          };
+        },
+        template: `
+          <div>
+            <button @click="$emit('custom-event-click')">{{grandson}}</button>
+          </div>
+        `,
+        mounted() {
+          console.log(`Grandson -> this.$attrs`, this.$attrs); // 可以获取 - 不在props中的组件上绑定的属性
+        },
+      });
+
+      // Son
+      const Son = Vue.component("Son", {
+        data() {
+          return {
+            son: "son",
+          };
+        },
+        props: {
+          name: {
+            require: true,
+          },
+          age: {
+            require: false,
+          },
+        },
+        template: `
+          <div>
+            <div>{{son}}</div>
+            <div>{{name}}</div>
+            <Grandson other="other" v-bind="$attrs"  v-on="$listeners" />
+          </div>
+        `, // v-bind=“$attrs”
+        components: {
+          Grandson,
+        },
+        mounted() {
+          console.log(`Son -> this.$attrs`, this.$attrs); // 可以获取 - 不在props中的组件上绑定的属性
+        },
+      });
+
+      new Vue({
+        el: "#root",
+        data() {
+          return {
+            app: "app",
+          };
+        },
+        components: {
+          Son,
+        },
+        methods: {
+          clickSon() {
+            console.log("clickSon");
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

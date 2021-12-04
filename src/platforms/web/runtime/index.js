@@ -41,7 +41,10 @@ Vue.prototype.$mount = function (
 ): Component {
   el = el && inBrowser ? query(el) : undefined
   // query(el) 的作用就是根据el的不同情况，返回对应的元素节点
+
   return mountComponent(this, el, hydrating)
+  // mountComponent
+  // 文件位置 src/core/instance/lifecycle.js
 }
 // 1
 // inBrowser

@@ -18,7 +18,7 @@ const idToTemplate = cached(id => {
 const mount = Vue.prototype.$mount
 // mount
 // - 这里缓存了在 runtime版本的上的  Vue.prototype.$mount，Vue是从 ‘./runtime/index’ 中引入的
-// - 缓存之后，又重写了 Vue.prototype.$mount，这样就能有个备份
+// - 缓存之后，又重写了 Vue.prototype.$mount，这样就做了备份
 
 Vue.prototype.$mount = function (
   el?: string | Element,

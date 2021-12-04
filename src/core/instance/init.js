@@ -80,6 +80,9 @@ export function initMixin (Vue: Class<Component>) {
     // $mount
     if (vm.$options.el) {
       vm.$mount(vm.$options.el) // mount阶段
+      // vm.$mount 方法的定义有两个版本
+      // - 一个是 runtime+compiler版本 -> src/platforms/web/entry-runtime-with-compiler.js
+      // - 另一个是 runtime版本 --------> src/platforms/web/runtime/index.js
     }
   }
 }

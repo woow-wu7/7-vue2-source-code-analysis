@@ -620,6 +620,16 @@ var MyComponent = Vue.component('my-component') // ------- 获取组件，获取
 - **帕斯卡命名(PascalCase)**
   - MyFirstName、MyLastName
 
+## (十四) vm.$attrs 和 vm.$listener
+- 详见 Test-attrs-listeners.html
+### (14.1) vm.$attrs
+- 包含了父作用域中不作为 prop 被识别 (且获取) 的 attribute 绑定，除了 (  class 和 style )
+- 可以通过 v-bind="$attrs" 传入内部组件——在创建高级别的组件时非常有用
+### (14.2) vm.$listener
+- 包含了父作用域中的 (不含 .native 修饰器的) v-on 事件监听器
+- 可以通过 v-on="$listeners" 传入内部组件——在创建更高层次的组件时非常有用
+
+
 
 # Xmind
 - [xmind-思维导图](https://github.com/woow-wu7/7-vue2-source-code-analysis/blob/main/xmind/)

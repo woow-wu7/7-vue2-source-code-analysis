@@ -168,7 +168,7 @@ export function mountComponent (
       }
     }
   }
-  callHook(vm, 'beforeMount')
+  callHook(vm, 'beforeMount') // beforeMount 钩子函数
 
   let updateComponent
   /* istanbul ignore if */
@@ -205,6 +205,7 @@ export function mountComponent (
       // hydrating 是一个标志位，为true时表示服务端渲染
       // 3
       // vm.render() 的作用就是把template编译成 vnode
+      // - 文件位置：src/core/instance/render.js
     }
 
   }
