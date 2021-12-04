@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./dist/vue.js"></script>
+  </head>
+  <body>
+    <!-- 在vue中使用HOC实现给每个button添加debounce功能 -->
+    <div id="root">
+      <hoc-button @click="clickFather">HocButton</hoc-button>
+    </div>
+    <script>
+      Vue.component("HocButton", {
+        props: {},
+        // template: `
+        //   <button @click="clickChild">
+        //     HocButton
+        //   </button>
+        // `,
+        // 使用上面的 template 也可以，这里使用 render 函数来渲染，因为 template和render最终都会转成render函数
+        render(createElement) {
+          return createElement(
+            "Button",
+            {
+              on: {
+                click: this.clickChild,
+              },
+              props: this.$props,
+              attrs: this.$attrs, // 包含了父作用域中不作为 prop 被识别 (且获取) 的 attribute 绑定 (class 和 style 除外)，配置上面props，能获取到所有组件上绑定的属性
+              scopedSlots: this.$scopedSlots, // 透传 scopedSlots
+            },
+            this.$slots.default // 默认default
+          );
+        },
+        methods: {
+          debounce(fn, delay) {
+            clearTimeout(fn.timer);
+            fn.timer = setTimeout(fn, delay);
+          },
+          clickChild() {
+            console.log("clickChild");
+            this.debounce(this.$listeners.click, 1000);
+            // 获取父作用域中的 click 事件的监听函数 clickFather
+            // vm.$listeners
+            // - 包含了父作用域中的 (不含 .native 修饰器的) v-on 事件监听器
+          },
+        },
+      });
+
+      new Vue({
+        el: "#root",
+        data() {
+          return {};
+        },
+        methods: {
+          clickFather() {
+            console.log("clickFather");
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
