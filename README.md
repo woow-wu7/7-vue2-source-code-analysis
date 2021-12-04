@@ -629,6 +629,7 @@ var MyComponent = Vue.component('my-component') // ------- 获取组件，获取
 ### (14.2) vm.$listeners
 - 包含了父作用域中的 (不含 .native 修饰器的) v-on 事件监听器
 - 可以通过 v-on="$listeners" 传入内部组件——在创建更高层次的组件时非常有用
+- `this.$listeners.click` 获取 `v-on:click="go"` 指定的go方法
 ### (14.3) vm.$slots
   - 用来访问被 ( 插槽分发 ) 的内容
   - `v-slot:foo` 中的内容将会在 `vm.$slots.foo` 中被找到
