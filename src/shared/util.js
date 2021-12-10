@@ -242,8 +242,21 @@ export const bind = Function.prototype.bind
   : polyfillBind
 
 /**
- * Convert an Array-like object to a real Array.
+ * Convert an Array-like object to a real Array. 将类似数组的对象转换成数组
+ * // 示例 toArray(arguments, 1);
  */
+// 1
+// new Array(length) 相当于声明长度为length的空数组
+// new Array(1,2,3) 相当于 const arr = [1, 2, 3]
+// 2
+// list [1,2,3,4]
+// start 2
+// -> 初始 i = 2
+// -> ret = [] 数组的长度是2
+// -> while
+// ----(i=1)--> ret[1] = list[3]
+// ----(i=0)--> ret[0] = list[2]
+// 整个 toArray 从后往前的遍历，将类似数组的对象，转成数组
 export function toArray (list: any, start?: number): Array<any> {
   start = start || 0
   let i = list.length - start

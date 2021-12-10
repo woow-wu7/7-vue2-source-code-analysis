@@ -22,7 +22,7 @@ camel 骆驼
   - 克隆下来的代码中的 dist 文件夹中有很多文件，其中最重要的是 vue.js 和 vue.js.map 文件
 - 第二步
   - 在 根目录 新建一个 index.html
-  - 在 index.html 中手动引入 vue 源文件`<script src="./dist/vue.js"></script>`，并写一些vue代码
+  - 在 index.html 中手动引入 vue 源文件`<script src="../dist/vue.js"></script>`，并写一些vue代码
   - 在浏览器中打开 index.html
   - **因为**：F12调试，查看 Sources 中的 dist 文件中只有 vue.js，这样是不能调试源码的
   - **所以**：我们需要继续以下步骤，实现可以调试源码
@@ -34,7 +34,7 @@ camel 骆驼
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <script src="./dist/vue.js"></script>
+    <script src="../dist/vue.js"></script>
   </head>
   <body>
     <div id="app">
@@ -564,7 +564,7 @@ var MyComponent = Vue.component('my-component') // ------- 获取组件，获取
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <script src="./dist/vue.js"></script>
+    <script src="../dist/vue.js"></script>
   </head>
   <body>
     <div id="app">
@@ -635,6 +635,8 @@ var MyComponent = Vue.component('my-component') // ------- 获取组件，获取
   - `v-slot:foo` 中的内容将会在 `vm.$slots.foo` 中被找到
   - 请注意插槽不是响应性的
 
+## (十五) Vue.use()
+- 
 
 
 # Xmind

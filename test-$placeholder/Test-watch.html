@@ -5,13 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <script src="./dist/vue.js"></script>
+    <script src="../dist/vue.js"></script>
   </head>
   <body>
     <div id="app">
-      <p>{{count}}</p>
+      <p>count: {{count}}</p>
+      <p>watchedCount: {{watchedCount}}</p>
 
-      <button @click="add">add</button>
+      <button @click="add">change count</button>
     </div>
     <script>
       new Vue({
@@ -19,16 +20,14 @@
         data() {
           return {
             count: 1,
+            watchedCount: 1,
           };
         },
-        // render(createElement) {
-        //   return createElement('div', {
-        //     attrs: {
-        //       id: 'app1',
-        //     },
-        //   }, this.count)
-        // }
-        // 手写render函数
+        watch: {
+          'count': function(newValue, oldValue) {
+            this.watchedCount = newValue
+          }
+        },
         methods: {
           add() {
             this.count = this.count + 1

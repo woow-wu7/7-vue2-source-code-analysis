@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue插件和Vue.use()</title>
+    <script src="../dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="root">
+      <button @click="runPlugin">测试插件</button>
+    </div>
+    <script>
+      const myPlugin = {
+        install: function (Vue) {
+          Vue.getTimeStamp = function () {
+            return +new Date();
+          };
+          Vue.prototype.$getTimeStamp = function () {
+            return +new Date();
+          };
+        },
+      };
+      Vue.use(myPlugin);
+      new Vue({
+        el: "#root",
+        methods: {
+          runPlugin() {
+            console.log(`this.$getTimeStamp()`, this.$getTimeStamp());
+            console.log(
+              ` this.constructor.getTimeStamp()`,
+              this.constructor.getTimeStamp()
+            );
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

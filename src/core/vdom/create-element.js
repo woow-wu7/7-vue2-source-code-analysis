@@ -23,6 +23,7 @@ import {
 const SIMPLE_NORMALIZE = 1
 const ALWAYS_NORMALIZE = 2
 
+// createElement
 // wrapper function for providing a more flexible interface
 // without getting yelled at by flow
 export function createElement (
