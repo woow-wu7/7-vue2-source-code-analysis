@@ -17,8 +17,8 @@ import { isFalse, isTrue, isDef, isUndef, isPrimitive } from 'shared/util'
 // because functional components already normalize their own children.
 export function simpleNormalizeChildren (children: any) {
   for (let i = 0; i < children.length; i++) {
-    if (Array.isArray(children[i])) {
-      return Array.prototype.concat.apply([], children)
+    if (Array.isArray(children[i])) { // 还是一个数组
+      return Array.prototype.concat.apply([], children) // 拍平为一层
     }
   }
   return children

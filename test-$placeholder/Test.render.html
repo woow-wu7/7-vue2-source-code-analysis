@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="../dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <template v-slot="default">默认插槽</template>
+    </div>
+    <script>
+      new Vue({
+        el: "#app",
+        render(createElement) {
+          return createElement(
+            "div",
+            {
+              props: {
+                age: 20,
+              },
+              attrs: {
+                // 注意：class 和 style 不在 attrs 中
+                id: "wrap-id",
+                "data-href": "custom-attribute",
+                // class: 'is-right' 不生效
+              },
+              style: {
+                width: "700px",
+                height: "200px",
+                border: "1px solid red",
+              },
+              class: {
+                wrapper: true,
+                container: true,
+                root: false,
+              },
+              on: {
+                click() {
+                  console.log("点击父元素会触发的事件");
+                },
+              },
+              slot: 'default',
+              // scopedSlots: {
+              //   default: props => createElement('span', props.text)
+              // }
+            },
+            [
+              createElement({
+                data() {
+                  return {
+                    name: "woow_wu7",
+                  };
+                },
+                template: `
+                  <div>
+                    <p>{{name}}</p>
+                    <button @click.stop="changeName">子组件的按钮</button>
+                  </div>
+                `,
+                methods: {
+                  changeName() {
+                    this.name = this.name + +new Date();
+                    console.log(
+                      `这里我们使用了事件修饰符 stop , 相当于event.stopPropagation，不然父组件上绑定的click事件也会触发`
+                    );
+                  },
+                },
+              }),
+              createElement("p", "p标签"),
+            ]
+          );
+        },
+      });
+    </script>
+  </body>
+</html>

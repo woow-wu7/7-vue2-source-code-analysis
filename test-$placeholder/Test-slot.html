@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="../dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <Child>
+        <template v-slot:default> <p>这是一个具名default插槽</p> </template>
+        <template v-slot:content="contentFromChild">
+          <div style="border: 1px solid red">
+            <p>这是一个具名content插槽</p>
+            <p>！！插槽中的内容的作用域绑定在父级！！--> {{fatherUser}}</p>
+            <p>！！但是可以使用作用域插槽，获取子作用域中的数据，通过v-slot:content="子作用中的数据组装成props来获取子作用域props" --> {{contentFromChild.childUser}}
+            </p>
+          </div>
+        </template>
+        <template v-slot:footer> <p>这是一个具名foot插槽</p> </template>
+      </Child>
+    </div>
+    <script>
+      Vue.component("Child", {
+        data() {
+          return {
+            childUser: "子作用域中的数据childUser",
+          };
+        },
+        mounted() {
+          console.log(`this.$slots -> 范围较小，不包含作用域插槽`, this.$slots)
+          console.log(`this.$scopedSlots -> 范围更大，包含了所有的slot`, this.$scopedSlots)
+        },
+        template: `
+        <div>
+          <p>Child组件</p>
+          <slot name="default"/>
+          <slot name="content" :childUser="childUser"/>
+          <slot name="footer"/>
+        </div>
+        `,
+      });
+      new Vue({
+        el: "#app",
+        data() {
+          return {
+            fatherUser: "父作用域中的数据fatherUser",
+          };
+        },
+      });
+    </script>
+  </body>
+</html>

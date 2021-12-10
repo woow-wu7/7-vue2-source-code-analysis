@@ -17,6 +17,35 @@ import VNode, { createEmptyVNode } from '../vdom/vnode'
 import { isUpdatingChildComponent } from './lifecycle'
 
 // initRender函数执行是在 init 的过程中
+// 1
+// render()
+// - render函数签名：(createElement: () => VNode) => VNode
+// 2
+// createElement()
+// 1. 返回值
+//  - createElement() 返回一个VNode
+// 2. 参数
+//    - 第一个参数：
+//      - {String | Object | Function}
+//      - HTML标签名、组件选项对象(其实就是一个组件)，或者 resolve 了上述任何一种的一个 async 函数。必填项。
+//    - 第二个参数
+//      - {Object}
+//      - 一个与模板中 attribute 对应的数据对象。可选。
+//      - 第二个参数其实就是数据对象，官网链接  https://cn.vuejs.org/v2/guide/render-function.html#createElement-%E5%8F%82%E6%95%B0
+//      - 从官网中我们需要学习到
+//        - 1. render和template相比的好处
+//        - 2. 第二个参数-即数据对象的属性有哪些，比如 class，style，attrs，props，domProps，on，nativeOn，directives，scopedSlots，slot，key，ref，refInFor
+//        - 3. render()方法中的一些约束
+//    - 第三个参数
+//      - {String | Array}
+//      - 子级虚拟节点 (VNodes)，由 `crateElement()` 构建而成，也可以使用字符串来生成“文本虚拟节点”。可选
+// - 参数注意点
+//  - 第二个和点三个参数是可选的
+//  - 当只有两个参数时，第二个参数会被当作第三个参数来处理
+
+// 3
+// 流程
+// initRender -> createElement() -> _createElement(context, tag, data, children, normalizationType)
 export function initRender (vm: Component) {
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null // v-once cached trees
