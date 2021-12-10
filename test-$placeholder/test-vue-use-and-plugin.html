@@ -14,15 +14,32 @@
     <script>
       const myPlugin = {
         install: function (Vue) {
+          // 插件中第一个参数是Vue，所有具有Vue所有的能力
           Vue.getTimeStamp = function () {
+            // 静态方法
             return +new Date();
           };
           Vue.prototype.$getTimeStamp = function () {
+            // 原型方法
             return +new Date();
           };
+          Vue.mixin({
+            // mixin参数配置对象中，和vue的配置对象具有相同的配置项
+            data() {
+              return {
+                name: "woow_wu7",
+              };
+            },
+            mounted() {
+              console.log(
+                "1. 这是mixin中的mounted()钩子 --> ",
+                `在插件中使用了mixin，这样在每个组件中都具有mounted中钩子中的函数，都会执行`
+              );
+            },
+          });
         },
       };
-      Vue.use(myPlugin);
+      Vue.use(myPlugin); // Vue.use() 执行必须在 new Vue() 之前
       new Vue({
         el: "#root",
         methods: {
@@ -33,6 +50,18 @@
               this.constructor.getTimeStamp()
             );
           },
+        },
+        data() {
+          return {
+            name: "woow_wu8", // 当组件和mixin中的选项冲突时，以组件中的属性优先，所以这里是8而不是7
+          };
+        },
+        mounted() {
+          console.log("2. 这是组件中的mounted()钩子");
+          console.log(
+            `this.name --> 当组件和mixin中的选项冲突时，以组件中的属性优先，所以这里是8而不是7`,
+            this.name
+          );
         },
       });
     </script>
