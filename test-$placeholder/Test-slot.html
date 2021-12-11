@@ -15,14 +15,19 @@
           <div style="border: 1px solid red">
             <p>这是一个具名content插槽</p>
             <p>！！插槽中的内容的作用域绑定在父级！！--> {{fatherUser}}</p>
-            <p>！！但是可以使用作用域插槽，获取子作用域中的数据，通过v-slot:content="子作用中的数据组装成props来获取子作用域props" --> {{contentFromChild.childUser}}
+            <p>
+              ！！但是可以使用作用域插槽，获取子作用域中的数据，通过v-slot:content="子作用中的数据组装成props来获取子作用域props"
+              --> {{contentFromChild.childUser}}
             </p>
           </div>
         </template>
         <template v-slot:footer> <p>这是一个具名foot插槽</p> </template>
       </Child>
+
+      <Grandson tag="div" component-name="Grandson" />
     </div>
     <script>
+      // Child
       Vue.component("Child", {
         data() {
           return {
@@ -30,8 +35,11 @@
           };
         },
         mounted() {
-          console.log(`this.$slots -> 范围较小，不包含作用域插槽`, this.$slots)
-          console.log(`this.$scopedSlots -> 范围更大，包含了所有的slot`, this.$scopedSlots)
+          console.log(`this.$slots -> 范围较小，不包含作用域插槽`, this.$slots);
+          console.log(
+            `this.$scopedSlots -> 范围更大，包含了所有的slot`,
+            this.$scopedSlots
+          );
         },
         template: `
         <div>
@@ -42,8 +50,44 @@
         </div>
         `,
       });
+
+      // grand-son
+      Vue.component("Grandson", {
+        props: {
+          tag: {
+            type: String,
+            default() {
+              return "div";
+            },
+          },
+          "component-name": {
+            type: String,
+            default() {
+              return "Child";
+            },
+          },
+        },
+        render(createElement) {
+          return createElement(
+            this.tag, // props中的属性可以通过 this 来访问
+            {
+              style: {
+                border: "1px solid blue",
+              },
+            },
+            this.componentName
+            // 这里可以使用 camel case 驼峰命名法
+            // 对比 pascal case 帕斯卡命名法
+          );
+        },
+      });
+
       new Vue({
         el: "#app",
+        // components: {
+        //   grandson,
+        //   child,
+        // },
         data() {
           return {
             fatherUser: "父作用域中的数据fatherUser",

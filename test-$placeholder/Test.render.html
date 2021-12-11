@@ -9,12 +9,13 @@
   </head>
   <body>
     <div id="app">
-      <template v-slot="default">默认插槽</template>
     </div>
     <script>
+      
       new Vue({
         el: "#app",
         render(createElement) {
+          console.log(`this.$slots`, this.$slots);
           return createElement(
             "div",
             {
@@ -37,15 +38,12 @@
                 container: true,
                 root: false,
               },
+              // slots: "default",
               on: {
                 click() {
                   console.log("点击父元素会触发的事件");
                 },
               },
-              slot: 'default',
-              // scopedSlots: {
-              //   default: props => createElement('span', props.text)
-              // }
             },
             [
               createElement({
@@ -70,6 +68,7 @@
                 },
               }),
               createElement("p", "p标签"),
+              this.$slots.default
             ]
           );
         },
