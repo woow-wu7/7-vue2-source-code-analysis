@@ -8,10 +8,8 @@
     <script src="../dist/vue.js"></script>
   </head>
   <body>
-    <div id="app">
-    </div>
+    <div id="app"></div>
     <script>
-      
       new Vue({
         el: "#app",
         render(createElement) {
@@ -68,7 +66,7 @@
                 },
               }),
               createElement("p", "p标签"),
-              this.$slots.default
+              this.$slots.default,
             ]
           );
         },

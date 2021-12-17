@@ -21,10 +21,11 @@ export function initUse(Vue: GlobalAPI) {
     // - 这里表示：获取 Vue.use() 的第二个参数 options 对象
 
     args.unshift(this);
-    // 将大 Vue 添加进参数数组最前面
+    // 将大 Vue 添加进参数数组最前面，这样调用plugin的install方法的第一个参数就变成了Vue
 
     if (typeof plugin.install === "function") {
       // 插件是对象，install方法存在并且是function，调用
+      // 注意：vue的plugin中的install方法的第一个参数：大Vue，就是args数组的第一个成员就是大Vue， args.unshift(this);
       plugin.install.apply(plugin, args);
     } else if (typeof plugin === "function") {
       // 插件本身是函数，调用
