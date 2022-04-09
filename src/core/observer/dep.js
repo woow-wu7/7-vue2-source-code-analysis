@@ -54,10 +54,14 @@ export default class Dep {
       // Dep.target 是当前正在执行的正在计算的 watcher，存在闭包中，相当于全局变量
       // 在下面有初始化
       Dep.target.addDep(this)
-      // 向 watcher 中添加 dep
-      // watcher 对象上有 addDep 方法
-      // Dep.target -> 指的是一个正在计算的 watcher
-      // this -------> 指的是 dep 实例对象
+
+      // addDep 方法的作用
+      // 1. 向正在计算的 watcher 的 newDeps 中添加 dep
+      // 2. 向 dep 的 subs 数组中添加 watcher
+      // 12是相互订阅的过程
+
+      // Dep.target ------------> 指的是一个正在计算的 watcher
+      // this ------------------> 指的是 dep 实例对象
     }
   }
 

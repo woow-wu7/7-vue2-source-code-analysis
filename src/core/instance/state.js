@@ -71,17 +71,20 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 // initState -> initData
 export function initState (vm: Component) {
   vm._watchers = []
-  const opts = vm.$options // 获取vm中掺入的配置对象 options
+  const opts = vm.$options // 获取vm中传入的配置对象 options
   if (opts.props) initProps(vm, opts.props) // ------------ initProps
   if (opts.methods) initMethods(vm, opts.methods) // ------ initMethods
+
   if (opts.data) {
     initData(vm)
     // ---------------------------------------------------- initData
   } else {
-    // data 不存在，传入空对象作为初始化data -> 进行observe
+    // data 不存在，传入 ( 空对象 ) 作为初始化data -> 进行observe
     observe(vm._data = {}, true /* asRootData */)
   }
+
   if (opts.computed) initComputed(vm, opts.computed) // --- initComputed
+
   if (opts.watch && opts.watch !== nativeWatch) {
     initWatch(vm, opts.watch) // -------------------------- initWatch
     // 1
@@ -158,6 +161,7 @@ function initData (vm: Component) {
   // - vm.$data
   // - vm.$props
   // - vm.$el ...
+  // - vm.$options
 
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
@@ -174,15 +178,15 @@ function initData (vm: Component) {
   // - data是一个 函数
   //    - data 是函数时，就执行 getData(data, vm)
   //    - data是一个函数的好处：
-  //      - 如果data是对象：则所有实例都会 ( 共享引用 ) ( 同一个原型上的data对象 )
-  //      - 如果data是函数：则每次新建实例，都会调用data函数，生成新的data对象，是不同的地址，独立不影响
+  //      - 如果data是对象：则所有实例都会 ( 共享引用 ) ( 同一个原型上的data对象 )，修改会相互影响
+  //      - 如果data是函数：则每次新建实例，都会调用data函数，生成新的data对象，是不同的内存地址，独立不影响
   // - data不存在时，做了熔断处理，将 {} 赋值给 data
 
   if (!isPlainObject(data)) {
     // 判断 data 是否是 plainObject 纯对象
     // 注意！！！！！
     //  - 1. 只能是对象 -------------> 这里组件中的data属性只能是一个对象，或者一个函数返回一个对象，并且是一个plainObject
-    //  - 2. 可以是对象，也可以是数组 -> 但是 observe(value) 的参数即可以是对象，也是可使数组；因为data和data的属性都需要进行observe()，data的属性也可能是一个对象或数组
+    //  - 2. 可以是对象，也可以是数组 -> 但是 observe(value) 的参数既可以是对象，也是可使数组；因为data和data的属性都需要进行observe()，data的属性也可能是一个对象或数组
     // 1
     // 什么是纯对象？
     // - plainObject是通过 ( 对象字面量方式声明{} ) 或者通过 ( Object.create() ) 生成的对象
@@ -249,6 +253,7 @@ function initData (vm: Component) {
       // vue 中 $ 和 _ 是保留字
       // 3
       // proxy 的作用：vm[key] = vm._data'[key]，即将data中的属性代理到vm上
+      // vm[key] === vm._data[key] === vm.$data[key] === vm.$options.data[key]
       proxy(vm, `_data`, key)
     }
   }
@@ -288,9 +293,9 @@ export function getData (data: Function, vm: Component): any {
   }
 }
 
-const computedWatcherOptions = { lazy: true }
+const computedWatcherOptions = { lazy: true } // computedWatcher 中的 lazy=true
 
-// ------------------------------------------------------------------
+// ------------------------------------------------------------------ 初始化 computed
 // initComputed
 // initComputed(vm, opts.computed)
 function initComputed (vm: Component, computed: Object) {
@@ -327,6 +332,16 @@ function initComputed (vm: Component, computed: Object) {
       // watchers 就是在 initComputed 最开始的地方定义的 对象
       // 3
       // computed中的每一个key都会new Watcher()
+      // 4
+      // computed一个使用的例子
+      // var vm = new Vue({
+      //   data: { message: 'Hello' },
+      //   computed: {
+      //     reversedMessage: function () {
+      //       return this.message.split('').reverse().join('')
+      //     }
+      //   }
+      // })
       watchers[key] = new Watcher(
         vm,
         getter || noop, // computed对象中的 方法
@@ -338,11 +353,14 @@ function initComputed (vm: Component, computed: Object) {
     // component-defined computed properties are already defined on the
     // component prototype. We only need to define computed properties defined
     // at instantiation here.
-    if (!(key in vm)) {
+    if (!(key in vm)) { // vm上没有改key才能添加为计算属性，因为不能和props，methods中有相同的key，因为都会proxy代理到vm上
       defineComputed(vm, key, userDef)
-      // defineComputed
-      // defineComputed 将 computed 变成响应式
-      // vm 上没有 computed 对象中的key，就执行 defineComputed
+      // defineComputed(vm, key, userDef)
+      // - 作用：defineComputed 将 computed 变成响应式， vm 上没有 computed 对象中的key，就执行 defineComputed
+      // - 参数
+      //    - vm -------> vm实例
+      //    - key ------> computed对象中的key
+      //    - userDef --> computed对象中key对应的方法
     } else if (process.env.NODE_ENV !== 'production') {
       if (key in vm.$data) {
         warn(`The computed property "${key}" is already defined in data.`, vm)
@@ -358,8 +376,8 @@ function initComputed (vm: Component, computed: Object) {
 
 export function defineComputed (
   target: any, // vm
-  key: string,
-  userDef: Object | Function // computed中的方法，或者computed中的属性对象中的get属性
+  key: string, // computed对象中的每个key
+  userDef: Object | Function // computed中的方法，或者computed中的属性对象中的get属性(因为computed也能set，但主要是get)
 ) {
   const shouldCache = !isServerRendering()
   // shouldCache
@@ -368,9 +386,9 @@ export function defineComputed (
 
   //======= get
   if (typeof userDef === 'function') { // ------------------- computed中的key是 function
-    sharedPropertyDefinition.get = shouldCache
-      ? createComputedGetter(key)
-      : createGetterInvoker(userDef)
+    sharedPropertyDefinition.get = shouldCache // sharedPropertyDefinition 是上面定义的一个对象，其实就是 Object.defineProperty(obj, props, descriptor)中的第三个参数-配置对象
+      ? createComputedGetter(key) // 浏览器环境
+      : createGetterInvoker(userDef) // ssr环境
     sharedPropertyDefinition.set = noop
   } else { // ------------------------------------------------ computed中的key是一个对象，对象中需要有get，set属性
     sharedPropertyDefinition.get = userDef.get
@@ -420,7 +438,11 @@ function createComputedGetter (key) {
         // 1. 默认初始化时，computed watcher 的 dirty=true
         // 2. 当 dirty=true 就会执行 watcher.evaluate()
         // 3. watcher.evaluate() 执行完后， dirty=false
-        // 总结：  dirty=true => watcher.evaluate() => dirty=false
+        // 总结：
+        // - dirty=true => watcher.evaluate() => dirty=false
+        // - 也就是说：
+        //    - 1. dirty=false时，不会执行 watcher.evaluate()
+        //    - 2. 而 watcher.evaluate() 会把 dirty修改为false，即不会在进入改if判断，而是直接返回下面的 watcher.value
 
         watcher.evaluate()
         // watcher.evaluate()
@@ -446,7 +468,7 @@ function createComputedGetter (key) {
       if (Dep.target) { // 正在执行的watcher，是渲染watcher
         watcher.depend()
       }
-      return watcher.value // 计算的结果，evaluate() 方法中计算了value的值
+      return watcher.value // 计算的结果，evaluate() 方法中计算了value的值，下次在访问该computed，就会直接返回，而不会再重新通过 watcher.get() 重新计算
     }
   }
 }
@@ -520,7 +542,7 @@ function createWatcher (
     options = handler // 将handler对象赋值给options
     handler = handler.handler // handler是对象时，一定要有一个handler属性，表示watch时需要执行的回调
   }
-  if (typeof handler === 'string') { // -------------- handler是一个string
+  if (typeof handler === 'string') { // -------------- handler是一个string，表示一个 methods 对象中的对应的方法
     handler = vm[handler]
     // 当handler是一个string时
     //  - 1. handler代表的是一个methods，methods中的每个方法都已经挂在到vm上了，所以可以直接获取 vm[handler]
@@ -530,7 +552,7 @@ function createWatcher (
   return vm.$watch(expOrFn, handler, options)
   // expOrFn -> key
   // handler -> value -> handler都已经处理成了一个函数
-  // vm.$watch 在该文件的最底部位置定义的
+  // vm.$watch 在本文件的最底部位置定义的
 }
 
 export function stateMixin (Vue: Class<Component>) {
@@ -573,11 +595,11 @@ export function stateMixin (Vue: Class<Component>) {
       return createWatcher(vm, expOrFn, cb, options)
       // 是一个对象，再调用 createWatcher 函数将 cb 处理成 function
       // 问题：为什么 cb 还能是对象呢？我们在 createWatcher 函数中不是都把 handler 处理成 function 了吗？
-      // 回答：是因为可以直接通过 this.$watch({...}) 出入一个对象
+      // 回答：是因为可以直接通过 this.$watch({...}) 传入一个对象
     }
 
     options = options || {}
-    options.user = true
+    options.user = true // watch对应的就是 userWatcher
     // options
     // - 注意：如果watch对象中属性对应的是一个对象时，对象中的属性会合并到options中
 

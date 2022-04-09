@@ -46,10 +46,13 @@ export default class Watcher {
 
   constructor (
     vm: Component,
-    expOrFn: string | Function, // 表达式 || 函数
-    cb: Function,
+    expOrFn: string | Function, // 表达式 || 函数 2. watch时expOrFn是watch对象中的 --- key
+    cb: Function, // 1. computed没有callback，2. watch的cb就是watch对象中key对应的 --- key变化时执行的函数
     options?: ?Object,
-    isRenderWatcher?: boolean  // 是否是renderWatcher，即渲染watcher
+    isRenderWatcher?: boolean
+    // isRenderWatcher
+    // 1. 表示是否是renderWatcher，---> 即是否是渲染watcher
+    // 2. computedWatcher ----------> 没有传该参数即为undefined
   ) {
     this.vm = vm
     if (isRenderWatcher) { // watcher渲染watcher
@@ -140,9 +143,50 @@ export default class Watcher {
         )
       }
     }
-    this.value = this.lazy
-      ? undefined // computed不会立即求值，computedWatcher的lazy=true；this.value = undefined
-      : this.get() // render watcher 和 user watcher 初始化时都会执行 this.get()
+
+    this.value = this.lazy // lazy是computedWatcher的标志，如果是computedWatcher，this.value=undefined，即不会立即求值
+      ? undefined // computedWatcher ----------------> 不会立即求值，computedWatcher的lazy=true；this.value = undefined
+      : this.get() // renderWatcher 和 userWatcher ---> 初始化时都会执行 this.get()
+
+    // this.value
+    // 1. computedWatcher
+    //    - computedWatcher <-> computed
+    ///   - this.value=undefined，即不会立即求值
+    //    - 问题：那什么时候求值？
+    //    - 回答：在 template 中访问到了 computed 定义的计算属性时会进行计算
+    //    - 原理：
+    //      - 过程：因为computed初始化时，会在defineComputed()函数中进行Object.defineProperty(target, key, sharedPropertyDefinition)，即get/set依赖收集和派发更新
+    //      - 最终：执行 watcher.evaluate() --> watcher.get() --> watcher.getter.call(vm, vm) --> expOrFn() --> 就是computed对象key对应的方法
+    //    - computed的特点
+    //      - 1. computed只有在 ( 被访问时 ) 才会去进行计算，上面已经分析过了
+    //      - 2. computed计算属性具有 ( 缓存功能 )
+    //      - 3. computed的依赖必须是 ( 响应式数据 )，不然依赖更新，也不会重新计算
+    //      - 4. computed的依赖项是响应式数据并且变化了，但是如果 ( 计算的结果不变 )，应用也 ( 不会重新渲染 )
+    //    - 相关原理及分析地址
+    //      - https://juejin.cn/post/6844904184035147790
+    //      - https://github.com/woow-wu7/6-review/blob/main/STEP_20220319/vue/vue.md
+    //      (1) computed只有在被访问时才会重新计算
+    //        - 因为：在new Watcher是computed watcher时，即lazy=true时，在构造函数中没有立即执行get()方法，而是在计算属性被访问时触发computed的响应式get后，执行的get方法中回去调用computed getter函数
+    //        - 之前：上面已经分析过了
+    //      (2) computed具有缓存功能
+    //        - 表现：表现为如果computed中的key被访问过，下次在访问不会再重新计算，而是直接返回之前计算好的值
+    //        - 原理：
+    //          - dirty=true，进行 watcher.evaluate() 执行computed的key对应的函数得到计算解结果
+    //          - watcher.evaluate() 计算到结果后，又会将 dirty=false
+    //          - 下次再访问到computed的key时，不会重新进行 watcher.evaluate() 的计算，而是直接返回之前计算好的结果，之前的值已经缓存在watcher.value中
+    // 2. userWatcher
+    //    - userWatcher <-> watch
+    //    - watch对象的key对应的value的类型
+    //      - function --- 表示 key 变化时执行的函数
+    //      - string ----- 表示 方法名 或 data.a对象.b属性
+    //      - object ----- 对象中一定要有 handler 方法，{ handler, immediate, deep, sync }
+    //      - array ------ 以上的组合
+    //      - 最终都会把不同类型的 handler 转换成函数，然后执行  vm.$watch(expOrFn, handler, options)
+    //      - 官网说明：https://cn.vuejs.org/v2/api/#watch
+    //    - watch对象的value是对象时，支持的属性
+    //      - deep：表示深度监听
+    //      - immediate：表示立即执行callback，不用等到key变化时才去执行
+    //      - sync：表示 ( 同步watch对象中的handler先执行 )，( 普通的watch对象的handler后执行 )
   }
 
   /**
@@ -194,6 +238,8 @@ export default class Watcher {
       this.newDeps.push(dep)
       if (!this.depIds.has(id)) {
         dep.addSub(this)
+        // this ------> 指 watcher
+        // 向 dep 的 subs 中添加 watcher
       }
     }
   }
