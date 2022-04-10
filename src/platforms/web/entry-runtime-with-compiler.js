@@ -42,7 +42,7 @@ Vue.prototype.$mount = function (
     // render方法不存在
     let template = options.template
     if (template) {
-      if (typeof template === 'string') {
+      if (typeof template === 'string') { // ---------------------------------- template是字符串
         if (template.charAt(0) === '#') {
           template = idToTemplate(template)
           // const idToTemplate = cached(id => {
@@ -57,21 +57,32 @@ Vue.prototype.$mount = function (
             )
           }
         }
-      } else if (template.nodeType) {
+      } else if (template.nodeType) { // ----------------------------------- template是一个节点
         // template是一个节点
+        // template.nodeType 返回一个数字，表示节点类型
         // Node.nodeType
-        // 元素节点element1 属性节点attr2 文本text3
-        // 注释节点comment8 文档节点document9
-        // 文档类型节点DocumentType 10
-        // 文档片断节点DocumentFragment 11
-        template = template.innerHTML
+
+        // 扩展
+        // Node.nodeType
+        // - 作用
+        //  - 返回一个 ( 整数值 )，表示 ( 节点的类型 )
+        // - 具体
+        //  - document 文档节点 ------------------ 9
+        //  - element 元素节点 ------------- 1
+        //  - attr 属性节点 ---------------- 2
+        //  - text 文本节点 ---------------- 3
+        //  - DocumentFragment 文档片段节点 ------ 11
+        //  - DocumentType 文档类型节点 ---------- 10
+        //  - Comment 注释节点 ------------------- 8
+
+        template = template.innerHTML // 获取html
       } else {
         if (process.env.NODE_ENV !== 'production') {
           warn('invalid template option:' + template, this)
         }
         return this
       }
-    } else if (el) {
+    } else if (el) { // --------------------------------------------------- template不存在，但 el 存在
       template = getOuterHTML(el)
       // function getOuterHTML (el: Element): string {
       //   if (el.outerHTML) {
@@ -92,6 +103,17 @@ Vue.prototype.$mount = function (
 
       // compileToFunctions()
       // - 将模版编译成 render 函数
+      // - 如果是runtime+compiler版本(即传入new Vue()的参数对象中不存在render方法)
+      //  - 1. 就会先处理template
+      //    - 将 template 通过 compileToFunctions(template, options) 函数编译成 ( render ) 函数
+      //  - 2. render函数【】【】
+      //    - render函数的主要作用：把 template｜el 转换成 vnode
+      //  - 3. 然后调用 mount.call(this, el, hydrating) 即 mountComponent(this, el, hydrating) 方法
+      //    - vm._render() 函数会作为 vm._update() 函数的参数 --> 触发 watcher.update() 方法
+      //    - mountComponent函数的文件位置：src/core/instance/lifecycle.js
+      //  - 4. update函数【】【】
+      //    - 负责把 ( vnode ) 挂载到 ( 真实的DOM上 )
+
       const { render, staticRenderFns } = compileToFunctions(template, {
         outputSourceRange: process.env.NODE_ENV !== 'production',
         shouldDecodeNewlines,

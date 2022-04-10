@@ -77,14 +77,19 @@ export function initMixin (Vue: Class<Component>) {
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
 
-    // $mount
+    // $mount 初始化挂在的过程
     if (vm.$options.el) {
       vm.$mount(vm.$options.el) // mount阶段
       // vm.$mount() -> mountComponent() -> updateComponent = () => { vm._update(vm._render(), hydrating)
       // 1
       // vm.$mount() 方法的定义有两个版本，文件位置
-      //   - 一个是 runtime+compiler版本 --> src/platforms/web/entry-runtime-with-compiler.js
-      //   - 另一个是 runtime版本 ---------> src/platforms/web/runtime/index.js
+      //   - 一个是 runtime+compiler 版本
+      //     - 渲染过程：template -> render函数 -> vnode -> 真实的DOM
+      //     - 文件位置：src/platforms/web/entry-runtime-with-compiler.js
+      //   - 另一个是 runtime 版本
+      //     - 渲染过程：render函数 -> vnode -> 真实的DOM
+      //     - 特点：打包后的体积比 runtime+compiler 版本的体积 ( 小30%左右 )
+      //     - 文件位置：src/platforms/web/runtime/index.js
       // 2
       // mountComponent() 文件位置 -------> src/core/instance/lifecycle.js
       // 3
