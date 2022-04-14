@@ -29,9 +29,11 @@ export function setActiveInstance(vm: Component) {
   }
 }
 
+// initLifecycle ------------------------------------------
 export function initLifecycle (vm: Component) {
   const options = vm.$options
 
+  // abstract 抽象组件相关
   // locate first non-abstract parent
   // 找出第一个不是 abstract 抽象组件的父组件
   let parent = options.parent

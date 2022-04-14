@@ -51,9 +51,9 @@ function pruneCacheEntry (
   cache: CacheEntryMap,
   key: string,
   keys: Array<string>,
-  current?: VNode
+  current?: VNode // 第4个组件，在生命周期 destroyed 执行时是没有传的，即为undefined
 ) {
-  const entry: ?CacheEntry = cache[key]
+  const entry: ?CacheEntry = cache[key] // 缓存的某个组件
   if (entry && (!current || entry.tag !== current.tag)) {
     entry.componentInstance.$destroy()
     // 卸载组件
@@ -86,6 +86,8 @@ export default {
   //   - 问题：抽象组件是如何实现 - 不在父组件链中的呢
   //   - 回答：在 ( 初始化阶段 ) 会调用 ( initLifecycle )，会去判断 ( 父组件是否为抽象组件 )，如果是抽象组件就选取 ( 抽象组件的上一层 ) 作为父级，即忽略抽象组件和父组件，抽象组件和子组件的层级关系
   //   - 简化：就是如果是抽象组件，就把抽象组件的 - 父组件作为子组件的父组件
+  //   - 流程：init -> initLifecycle(vm)
+  //   - 文件位置：src/core/instance/lifecycle.js
   // - 常见的抽象组件：<keep-alive> <transition>
 
   // 3 个 props
@@ -146,7 +148,7 @@ export default {
 
   destroyed () {
     for (const key in this.cache) {
-      pruneCacheEntry(this.cache, key, this.keys)
+      pruneCacheEntry(this.cache, key, this.keys) // 清除缓存的组件，同时卸载组件
     }
   },
 
@@ -214,7 +216,9 @@ export default {
         this.keyToCache = key // 供 cacheVNode 方法使用
       }
 
-      vnode.data.keepAlive = true // 在组件的data中，添加标志位 keepAlive，表示该组件被缓存了
+      vnode.data.keepAlive = true
+      // 在组件的data中，添加标志位 keepAlive，表示该组件被缓存了
+      // 注意：这里是 <keep-alive> 包裹的组件的data.keepAlive，而不是 keep-alive 组件
     }
     return vnode || (slot && slot[0]) // 返回第一个组件，或者 slot，或者 slot[0]，逐渐降级
   }
