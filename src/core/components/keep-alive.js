@@ -13,17 +13,22 @@ type CacheEntryMap = { [key: string]: ?CacheEntry };
 
 function getComponentName (opts: ?VNodeComponentOptions): ?string {
   return opts && (opts.Ctor.options.name || opts.tag)
+  // name: 组件的 name 属性
+  // tag: 不存在name，则使用 tag
 }
 
+// matches
+// - 调用 matches(include, name)
 function matches (pattern: string | RegExp | Array<string>, name: string): boolean {
-  if (Array.isArray(pattern)) {
+  if (Array.isArray(pattern)) { // --------------------- 数组
     return pattern.indexOf(name) > -1
-  } else if (typeof pattern === 'string') {
+  } else if (typeof pattern === 'string') { // -------- 逗号分隔的字符串
     return pattern.split(',').indexOf(name) > -1
-  } else if (isRegExp(pattern)) {
+  } else if (isRegExp(pattern)) { // ------------------- 正则
     return pattern.test(name)
   }
   /* istanbul ignore next */
+  // 以上 name 在 include 都不存在，返回false
   return false
 }
 
@@ -50,7 +55,11 @@ function pruneCacheEntry (
 ) {
   const entry: ?CacheEntry = cache[key]
   if (entry && (!current || entry.tag !== current.tag)) {
-    entry.componentInstance.$destroy() // 卸载组件
+    entry.componentInstance.$destroy()
+    // 卸载组件
+    // 这里注意：
+    // - 卸载组件后在加载组件就会走生命周期钩子
+    // - 而缓存的组件被激活时，不会走组件的生命周期钩子函数
   }
   cache[key] = null // 删除缓存的组件
   remove(keys, key) // 删除 key，keys是用来标记是否常用的手段
@@ -58,6 +67,13 @@ function pruneCacheEntry (
 
 const patternTypes: Array<Function> = [String, RegExp, Array]
 
+
+
+// keep-alive 组件 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// 1
+// keep-alive组件的 - 初始化全局注册
+// - 原因：因为 keep-alive 是一个组件，初始化的时需要注册成vue的全局组件，则可以在所有的页面中使用全局组件
+// - 流程：
 export default {
   name: 'keep-alive',
   abstract: true,
@@ -136,6 +152,8 @@ export default {
 
   mounted () {
     this.cacheVNode()
+
+    // 监听 include 和 exclude 的变化，从而决定是否缓存组件
     this.$watch('include', val => {
       pruneCache(this, name => matches(val, name))
     })
@@ -158,8 +176,10 @@ export default {
     if (componentOptions) {
       // check pattern
       // 检查模式
-      const name: ?string = getComponentName(componentOptions) // 获取组件的 name 属性
+      const name: ?string = getComponentName(componentOptions) // 获取组件的 name 属性，或 tag 属性
       const { include, exclude } = this
+
+      // 111111 不做缓存
       if (
         // not included
         (include && (!name || !matches(include, name))) ||
@@ -167,9 +187,13 @@ export default {
         (exclude && name && matches(exclude, name))
       ) {
         // 组件名与include不匹配或与exclude匹配都会直接退出并返回 VNode，不走缓存机制
+        // - 1. name 在 include 中不存在
+        // - 2. name 在 exclude 中存在
+        // - 以上两种情况都直接返回返回 slot，不做缓存处理
         return vnode
       }
 
+      // 222222 以下是缓存的逻辑
       const { cache, keys } = this
       const key: ?string = vnode.key == null
         // same constructor may get registered as different local components
@@ -190,7 +214,7 @@ export default {
         this.keyToCache = key // 供 cacheVNode 方法使用
       }
 
-      vnode.data.keepAlive = true // 添加组件的data中，添加标志位 keepAlive
+      vnode.data.keepAlive = true // 在组件的data中，添加标志位 keepAlive，表示该组件被缓存了
     }
     return vnode || (slot && slot[0]) // 返回第一个组件，或者 slot，或者 slot[0]，逐渐降级
   }

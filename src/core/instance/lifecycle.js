@@ -33,14 +33,17 @@ export function initLifecycle (vm: Component) {
   const options = vm.$options
 
   // locate first non-abstract parent
+  // 找出第一个不是 abstract 抽象组件的父组件
   let parent = options.parent
-  if (parent && !options.abstract) {
+  if (parent && !options.abstract) { // 当前组件不是抽象组件
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
+      // 父组件是抽象组件，就继续往上找，直到不是抽象组件为止
     }
-    parent.$children.push(vm)
+    parent.$children.push(vm) // 然后把当前vm作为第一个不是抽象组件的父组件的children
   }
 
+  // 以下是一些 ( vm组件实例属性 ) 的赋值，即初始化
   vm.$parent = parent
   vm.$root = parent ? parent.$root : vm
 

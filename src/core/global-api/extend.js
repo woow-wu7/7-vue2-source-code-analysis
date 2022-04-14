@@ -22,18 +22,20 @@ export function initExtend (Vue: GlobalAPI) {
   Vue.extend = function (extendOptions: Object): Function {
     extendOptions = extendOptions || {}
     const Super = this  // this指的是Vue
-    const SuperId = Super.cid // SuperId => id
+    const SuperId = Super.cid // SuperId => cid，是构造函数的唯一表示
 
     const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {})
     // cachedCtors
     // - 用来缓存 Constructor
     // - 参数对象中不存在 _Ctor 属性，就将 cachedCtors = extendOptions._Ctor = {} 赋值为空对象
 
+    // 1. 有缓存，直接返回
     if (cachedCtors[SuperId]) {
       // 存在缓存，直接返回
       return cachedCtors[SuperId]
     }
 
+    // 2. 没有缓存，继续往下执行
     const name = extendOptions.name || Super.options.name
     // name
     // - 参数对象中不存在 name 属性，就是用父类的options的name属性
@@ -60,13 +62,15 @@ export function initExtend (Vue: GlobalAPI) {
       extendOptions
     )
 
-    Sub['super'] = Super  // 在子类上挂载 super 属性，指向父类
+    Sub['super'] = Super  // 在子类上挂载 super 属性，指向父类；即子类中包含了父类的引用
 
     // For props and computed properties, we define the proxy getters on
     // the Vue instances at extension time, on the extended prototype. This
     // avoids Object.defineProperty calls for each instance created.
+    // 在扩展的时候定义getters来扩展props和computed，避免在创建实例的时候通过Object.defineProperty调用
     if (Sub.options.props) {
       initProps(Sub)
+      // 初始化 子类 的props
       // props属性存在，就将props做一层代理
       // initProps方法可以让用户访问this[propName]时相当于访问this._props[propName]
     }
@@ -110,6 +114,7 @@ export function initExtend (Vue: GlobalAPI) {
 
     return Sub
     // 返回 Sub
+    // 其实就是通过拷贝赋值的方式创建子类
   }
 }
 
