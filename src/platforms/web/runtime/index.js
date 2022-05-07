@@ -35,6 +35,12 @@ Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // runtime 版本
 // public mount method
+
+// 扩展
+// ( runtime版本 ) 和 ( runtime+compiler版本 ) 有什么区别 ？
+// - runtime版本：------------- 直接使用render函数，不能使用template
+// - runtime+compiler版本：---- 会在运行时，将 template 编译成 render 函数
+
 Vue.prototype.$mount = function (
   el?: string | Element, // el可能是字符串，表示css选择器；也可能是一个元素节点
   hydrating?: boolean

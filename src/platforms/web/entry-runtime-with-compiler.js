@@ -9,23 +9,52 @@ import { query } from './util/index'
 import { compileToFunctions } from './compiler/index'
 import { shouldDecodeNewlines, shouldDecodeNewlinesForHref } from './util/compat'
 
+
+// 1
+// cached
+// export function cached<F: Function> (fn: F): F {
+//   const cache = Object.create(null)
+//   return (function cachedFn (str: string) {
+//     const hit = cache[str]
+//     return hit || (cache[str] = fn(str))
+//     // 1. 第一层函数：cached(fn)
+//     // 2. 第二次函数 cachedFn(str)
+//     // 整个逻辑表示：
+//     //  - 如果 cache缓存对象中 str 存在，就直接返回 ---- 其实 cache[str]是一个函数，因为初始时不存在会执行 cache[str] = fn(str)
+//     // 最终的功能
+//     //  - 就是缓存函数参数，如果参数之前传过，会返回之前该参数计算的结果值
+//   }: any)
+// }
+// - cached(fn) 执行后返回的是一个函数，即 idToTemplate 是一个函数
+// - idToTemplate(str) 函数的参数是一个字符串
+
+// 2
+// idToTemplate
 const idToTemplate = cached(id => {
   const el = query(id)
   return el && el.innerHTML
 })
 
-// runtime + compiler 版本
+
+
+// $mount ------------------------------------------------------------------------------------
+// mount 阶段
+// - runtime + compiler 版本
+// - 1. 作用：mount变量 -> 这里缓存了在 ( runtime版本的上的 )
+// - 2. 文件路径：Vue.prototype.$mount ->  ‘src/platforms/web/runtime/index.js’ 中引入的
+// - 3. 引入：通过 import Vue from './runtime/index' 引入Vue，而该文件中就在 Vue.prototype 上声明了 $mount 方法
+// - 4. 总结：缓存之后，又重写了 Vue.prototype.$mount，这样就做了 mount 备份，重写后能拿到缓存的mount
 const mount = Vue.prototype.$mount
-// mount
-// - 这里缓存了在 runtime版本的上的  Vue.prototype.$mount，Vue是从 ‘./runtime/index’ 中引入的
-// - 缓存之后，又重写了 Vue.prototype.$mount，这样就做了备份
 
 Vue.prototype.$mount = function (
-  el?: string | Element,
+  el?: string | Element, // 在初始化时，传入el是string ---> vm.$mount(vm.$options.el) -> new Vue({ el: "#app", })
   hydrating?: boolean
 ): Component {
+
   el = el && query(el)
-  // query(el) 的作用就是根据el的不同情况，返回对应的元素节点
+  // query(el)
+  // - 作用：就是根据el的不同情况，返回对应的 ( 元素节点 )
+  // - 文件路径： './util/index'
 
   /* istanbul ignore if */
   if (el === document.body || el === document.documentElement) {
@@ -40,15 +69,30 @@ Vue.prototype.$mount = function (
   // resolve template/el and convert to render function
   if (!options.render) { // render函数不存在
     // render方法不存在
+
+    // 扩展
+    // - vue中 template 模版的 4 种写法
+    // - 链接：https://blog.csdn.net/a460550542/article/details/122063298
+    // - 测试：当前项目的根目录/index-test.html
+    // - 详情：2022-05-06.md
+
     let template = options.template
     if (template) {
-      if (typeof template === 'string') { // ---------------------------------- template是字符串
+      if (typeof template === 'string') { // ---------------------- template是字符串
         if (template.charAt(0) === '#') {
+          // template是字符串，并且new Vue({template: '#xx'})是一个id选择器
+          // es6中增加了 string.at() 作用和 string.charAt() 类似
+          // template字符串以#开头，说明是一个 id 选择器
+          // 详情：2022-05-06.md
+
           template = idToTemplate(template)
           // const idToTemplate = cached(id => {
           //   const el = query(id)
           //   return el && el.innerHTML
           // })
+          // - idToTemplate(template) 中的参数 template 表示的就是 id，该id作为 cached(fn) 的 fn的参数
+
+
           /* istanbul ignore if */
           if (process.env.NODE_ENV !== 'production' && !template) {
             warn(
@@ -57,7 +101,7 @@ Vue.prototype.$mount = function (
             )
           }
         }
-      } else if (template.nodeType) { // ----------------------------------- template是一个节点
+      } else if (template.nodeType) { // -------------------------- template是一个节点，即一个DOM对象
         // template是一个节点
         // template.nodeType 返回一个数字，表示节点类型
         // Node.nodeType
@@ -67,23 +111,24 @@ Vue.prototype.$mount = function (
         // - 作用
         //  - 返回一个 ( 整数值 )，表示 ( 节点的类型 )
         // - 具体
-        //  - document 文档节点 ------------------ 9
         //  - element 元素节点 ------------- 1
         //  - attr 属性节点 ---------------- 2
         //  - text 文本节点 ---------------- 3
         //  - DocumentFragment 文档片段节点 ------ 11
         //  - DocumentType 文档类型节点 ---------- 10
+        //  - document 文档节点 ------------------ 9
         //  - Comment 注释节点 ------------------- 8
 
-        template = template.innerHTML // 获取html
+        template = template.innerHTML // 获取 DOM对象的 innerHTML
       } else {
         if (process.env.NODE_ENV !== 'production') {
           warn('invalid template option:' + template, this)
         }
         return this
       }
-    } else if (el) { // --------------------------------------------------- template不存在，但 el 存在
+    } else if (el) { // ------------------------------------------- template不存在，但 el 存在
       template = getOuterHTML(el)
+      // 1
       // function getOuterHTML (el: Element): string {
       //   if (el.outerHTML) {
       //     return el.outerHTML
@@ -94,7 +139,23 @@ Vue.prototype.$mount = function (
       //     return container.innerHTML
       //   }
       // }
+
+      // 2
+      // Element.outerHTML
+      // - 返回一个字符串，表示当前元素节点的所有 HTML 代码，包括该元素本身和所有子元素
+      // - 比 innerHTML 多了 元素自身
+      // - 例子
+      // HTML 代码如下
+      // <div id="d"><p>Hello</p></div>
+      // var d = document.getElementById('d');
+      // d.outerHTML
+      // '<div id="d"><p>Hello</p></div>'
     }
+
+
+    // 上面的过程做了以下处理
+    // - 1. template存在
+    // - 2. template不存在，但是el存在，将el选择器对应的DOM赋值给 template
     if (template) {
       /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
@@ -114,6 +175,8 @@ Vue.prototype.$mount = function (
       //  - 4. update函数【】【】
       //    - 负责把 ( vnode ) 挂载到 ( 真实的DOM上 )
 
+
+      // 最终 template 都会被传入 compileToFunctions 函数中
       const { render, staticRenderFns } = compileToFunctions(template, {
         outputSourceRange: process.env.NODE_ENV !== 'production',
         shouldDecodeNewlines,
@@ -131,7 +194,8 @@ Vue.prototype.$mount = function (
       }
     }
   }
-  return mount.call(this, el, hydrating)
+
+  return mount.call(this, el, hydrating) // 这里的el是id选择器对应的DOM
    // 调用上面缓存的 mount 方法
    // - 具体文件路径：'./runtime/index'
     // mount 中会调用  mountComponent(this, el, hydrating)

@@ -103,7 +103,10 @@ export function renderMixin (Vue: Class<Component>) {
   }
 
 
-  // _render() ---------------------------------------------
+  // render 方法
+  // _render() ----------------------------------------------------------------------
+  // - render 方法返回的是一个 vnode
+  // - virtualDOM -> virtual 是虚拟的意思
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
     const { render, _parentVnode } = vm.$options
@@ -126,9 +129,24 @@ export function renderMixin (Vue: Class<Component>) {
       // separately from one another. Nested component's render fns are called
       // when parent component is patched.
       currentRenderingInstance = vm
-      //
+
       // 生成vnode
-      // vm.$createElement 在上面 initRender 中定义的
+      // 1
+      // vm.$createElement
+      // - vm.$createElement 在 initRender 中定义的
+      // - vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
+      // - 文件路径：
+      //    - 1. 本文件中，initRender() 函数中声明了 vm.$createElement
+      //    - 2. 而 initRender 执行是在 new Vue() -> this._init() 方法中调用的
+      // 2
+      // vm.$createElement -> createElement
+      // - createElement方法的文件路径：src/core/vdom/create-element.js
+      // 3
+      // vm._renderProxy
+      // - 生产环境：vm._renderProxy 是 vm
+      // - 开发环境：vm._renderProxy 可能是一个 proxy 对象，即 initProxy(vm)
+      // - if (process.env.NODE_ENV !== 'production') { initProxy(vm) } else { vm._renderProxy = vm }
+      // - 具体在：src/core/instance/init.js 中
       vnode = render.call(vm._renderProxy, vm.$createElement)
     } catch (e) {
       handleError(e, vm, `render`)

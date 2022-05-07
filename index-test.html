@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./dist/vue.js"></script>
+
+    <script type="x-template" id="templateScript">
+      <h1 style="color:red">3 -> template写在script标签中，通过通过new Vue({template: '#templateScript'})来访问</h1>
+    </script>
+  </head>
+  <body>
+    <div id="app">
+      <p>{{count}}</p>
+      <!-- 手写render函数时，template中的内容将不会生效，即整个id是app的div都会被手写的render函数的内容替换 -->
+    </div>
+
+    <template id="templateTag">
+      <div>
+        2 -> template写在 template标签中，通过new Vue({template:
+        '#templateTag'})来访问
+      </div>
+    </template>
+    <script>
+      new Vue({
+        el: "#app",
+        // template: "#templateTag",
+        // template: "#templateScript",
+        data() {
+          return {
+            count: 1,
+          };
+        },
+        beforeCreate() {
+          console.log("this.count", this.count); // 访问不到，beforeCreate -> initState -> created
+        },
+        created() {
+          console.log("this.count", this.count); // 能访问到
+        },
+        render(createElement) {
+          // render函数
+          // - render函数调用是在 src/core/instance/render.js 中
+
+          // - vnode = render.call(vm._renderProxy, vm.$createElement)
+          //  1. 可以看到：render方法的实参是：vm.$createElement
+          //  2. vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
+          //  3. 所以：最终就是调用 createElement()
+
+          return createElement(
+            "div",
+            {
+              attrs: {
+                id: "#app1",
+              },
+            },
+            this.count + 1
+          );
+        },
+      });
+    </script>
+  </body>
+</html>

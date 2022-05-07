@@ -46,10 +46,10 @@ export default class Watcher {
 
   constructor (
     vm: Component,
-    expOrFn: string | Function, // 表达式 || 函数 2. watch时expOrFn是watch对象中的 --- key
-    cb: Function, // 1. computed没有callback，2. watch的cb就是watch对象中key对应的 --- key变化时执行的函数
-    options?: ?Object,
-    isRenderWatcher?: boolean
+    expOrFn: string | Function, // 表达式 || 函数 2. watch时expOrFn是watch对象中的key字符串 3.渲染watcher时expOrFn是一个函数，即updateComponent = () => { vm._update(vm._render(), hydrating) }
+    cb: Function, // 1. computed没有cb，2. watch的cb就是watch对象中key对应的 --- key变化时执行的函数 3. 渲染watcher时，cd是noop空函数
+    options?: ?Object, // 1. 渲染watcher时，首次渲染时 options 是一个具有 before 方法的对象
+    isRenderWatcher?: boolean // isRenderWatcher 是否是 renderWatcher 渲染watcher 的标志位
     // isRenderWatcher
     // 1. 表示是否是renderWatcher，---> 即是否是渲染watcher
     // 2. computedWatcher ----------> 没有传该参数即为undefined
@@ -84,21 +84,27 @@ export default class Watcher {
     this.depIds = new Set()
     this.newDepIds = new Set()
     this.expression = process.env.NODE_ENV !== 'production'
-      ? expOrFn.toString()
+      ? expOrFn.toString() // 字符串toString还是自身，函数toString将整个函数体转成字符串形式
       : ''
     // parse expression for getter
 
     // expOrFn
-    // - 1. 函数：renderWatcher 和 computedWatcher 的 expOrFn 是一个函数
-    // - 2. 字符串：userWatcher 的 expOrFn 是一个字符串
+    // - 1. 函数：renderWatcher 或 computedWatcher 的 expOrFn 是一个函数
+    // - 2. 字符串：userWatcher 的 expOrFn 是一个字符串，即 watch 时是字符串
 
-    // 1 expOrFn 是一个函数
-    if (typeof expOrFn === 'function') {
-      // 如果传入 Watcher 构造函数的 ( 第二个参数expOrFn是一个函数 )
-      this.getter = expOrFn // computedWatcher时，expOrFn是computed对象中的每个方法
+    // 1
+    // expOrFn 是一个函数即 renderWatcher 或 computedWatcher
+
+    if (typeof expOrFn === 'function') { // 如果传入 Watcher 构造函数的 ( 第二个参数expOrFn是一个函数 )
+
+      this.getter = expOrFn
+      // computedWatcher时，expOrFn是computed对象中的每个方法
+      // renderWatcher时，expOrFn是 updateComponent = () => { vm._update(vm._render(), hydrating) } 这样一个函数
+
     } else {
-      // 2 expOrFn 是一个字符串
-      //   -> 是一个字符串时，可能是一个 user watcher
+      // 2
+      // expOrFn 是一个字符串
+      // - 是一个字符串时，是一个 user watcher
       this.getter = parsePath(expOrFn)
       // this.getter 在 this.get() 方法中执行
       // parsePath

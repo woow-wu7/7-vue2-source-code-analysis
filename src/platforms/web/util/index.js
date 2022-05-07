@@ -8,6 +8,7 @@ export * from './element'
 
 /**
  * Query an element selector if it's not an element already.
+ * 元素选择器，最终返回一个元素节点
  */
 export function query (el: string | Element): Element {
 
@@ -15,7 +16,7 @@ export function query (el: string | Element): Element {
   if (typeof el === 'string') { // ------------------------------------------- el=string
 
     const selected = document.querySelector(el)
-    // querySelector()
+    // querySelector(css选择器)
     // - 参数
     //  - css选择器
     // - 返回值
@@ -31,21 +32,26 @@ export function query (el: string | Element): Element {
     // NodeList 和 HTMLCollection 的区别
     // - NodeList
     //  - 特点：静态集合
-    //  - 比如：querySelectorAll()
+    //  - 比如：querySelectorAll() --------> NodeList -------> 静态集合 -> DOM修改后不会实时反应
     // - HTMLCollection
     //  - 特点：动态集合
-    //  - 比如：getElementsByTagName()
+    //  - 比如：getElementsByTagName() ----> HTMLCollection -> 动态集合
+    // - 记忆方法
+    //  - 长的就是长的，长的就是动态的
+    //  - getElementsByTagName > querySelectorAll，HTMLCollection > NodeList
+    // - 代码
+    //  - https://github.com/woow-wu7/6-review/commit/84232589b2785380f2eaf849d531a8873d2cdde3
 
     // 扩展
     // document.querySelector(css选择器字符串)
-    // 参数
-    //  - 接受一个 ( css选择器 ) 字符串为参数
     //  - css选择器有哪些？
     //    - 元素选择器：id class element *
     //    - 关系选择器：子选择器>，后代选择器，相邻选择器+，兄弟选择器～
     //    - 属性选择器：element[attr=a]
     //    - 伪元素选择器
     //    - 伪类选择器
+    // 参数
+    //  - 接受一个 ( css选择器 ) 字符串为参数
     // 返回值
     //  - 匹配该选择器的 ( 元素节点 )
     //  - 如果有多个元素节点满足匹配条件，则返回 ( 第一个 ) 匹配的元素节点
@@ -55,12 +61,12 @@ export function query (el: string | Element): Element {
     // - 作用
     //  - 返回一个 ( 整数值 )，表示 ( 节点的类型 )
     // - 具体
-    //  - document 文档节点 ------------------ 9
     //  - element 元素节点 ------------- 1
     //  - attr 属性节点 ---------------- 2
     //  - text 文本节点 ---------------- 3
-    //  - DocumentFragment 文档片段节点 ------ 11
+    //  - DocumentFragment 文档片段节点 ------ 11 - fragment是片段的意思
     //  - DocumentType 文档类型节点 ---------- 10
+    //  - document 文档节点 ------------------ 9
     //  - Comment 注释节点 ------------------- 8
 
 

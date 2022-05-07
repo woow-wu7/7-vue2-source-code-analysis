@@ -2,7 +2,7 @@
 
 import config from '../config'
 import Watcher from '../observer/watcher'
-import { mark, measure } from '../util/perf'
+import { mark, measure } from '../util/perf' // perf 是性能的意思
 import { createEmptyVNode } from '../vdom/vnode'
 import { updateComponentListeners } from './events'
 import { resolveSlots } from './render-helpers/resolve-slots'
@@ -145,8 +145,20 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
+// ------------------------------------------------------------------------------------------
 // mountComponent
 // Vue.prototype.$mount = (el, hydrating) => mountComponent(this, el, hydrating)
+
+// 整个new Vue() 挂在的流程如下
+// - new Vue() -> this._init() -> vm.$mount -> mount.call(this, el, hydrating) ->
+// - -> new Watcher(vm, updateComponent, ...) -> mountComponent(this, el, hydrating) ->
+// - -> vm._update(vm._render(), hydrating)
+
+// 1
+// vm.render()
+// - 文件位置：src/core/instance/render.js
+// - 作用：生成 vnode
+
 export function mountComponent (
   vm: Component,
   el: ?Element,
@@ -154,7 +166,7 @@ export function mountComponent (
 ): Component {
   vm.$el = el // vm.$el 赋值
   if (!vm.$options.render) {
-    vm.$options.render = createEmptyVNode
+    vm.$options.render = createEmptyVNode // 创建一个空的 vnode
     if (process.env.NODE_ENV !== 'production') {
       /* istanbul ignore if */
       if ((vm.$options.template && vm.$options.template.charAt(0) !== '#') ||
@@ -196,7 +208,8 @@ export function mountComponent (
     }
   } else {
     // updateComponent
-    // - 除了mount阶段执行外，也会在 dep.notify() renderWatcher派发更新流程中执行
+    // - 除了mount阶段执行外
+    // - 也会在 dep.notify() renderWatcher派发更新流程中执行
 
     updateComponent = () => {
       vm._update(vm._render(), hydrating)
@@ -209,11 +222,17 @@ export function mountComponent (
       // 2
       // hydrating 是一个标志位，为true时表示服务端渲染
       // 3
-      // vm.render() 的作用就是把template编译成 vnode
+      // vm.render() 的作用就是把 template 编译成 vnode
       // - 文件位置：src/core/instance/render.js
+      // 4
+      // updateComponent 其实就是执行了一次真实的渲染
     }
 
   }
+
+  // ------------------------------------------------------------------------------------
+  // 1
+  // mountComponent 方法中执行了 new Watcher
 
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
@@ -221,6 +240,15 @@ export function mountComponent (
   // Watcher
   // - Watcher构造函数接受 5 个参数
   // - constructor ( vm: Component, expOrFn: string | Function, cb: Function, options?: ?Object, isRenderWatcher?: boolean )
+
+  // 2
+  // updateComponent = () => { vm._update(vm._render(), hydrating) }
+  // updateComponent 其实就是执行了一个渲染
+
+  // 3
+  // noop 是一个空函数
+  // function noop (a?: any, b?: any, c?: any) {}
+
   new Watcher(vm, updateComponent, noop, {
     before () {
       if (vm._isMounted && !vm._isDestroyed) {
