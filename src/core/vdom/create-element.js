@@ -34,21 +34,21 @@ const ALWAYS_NORMALIZE = 2
 // 1. 返回值
 //  - createElement() 返回一个VNode
 // 2. 参数
-//    - 第一个参数：
+//    - 第一个参数 -> tag
 //      - {String | Object | Function}
 //      - HTML标签名、组件选项对象(其实就是一个组件)，或者 resolve 了上述任何一种的一个 async 函数。必填项。
-//    - 第二个参数
+//    - 第二个参数 -> data
 //      - {Object}
-//      - 一个与模板中 attribute 对应的数据对象。可选。
+//      - 一个与模板中 attribute 对应的 ( 数据对象 )。可选。
 //      - 第二个参数其实就是数据对象，官网链接  https://cn.vuejs.org/v2/guide/render-function.html#createElement-%E5%8F%82%E6%95%B0
 //      - 从官网中我们需要学习到
 //        - 1. render和template相比的好处
 //        - 2. 第二个参数-即数据对象的属性有哪些，比如 class，style，attrs，props，domProps，on，nativeOn，directives，scopedSlots，slot，key，ref，refInFor
 //        - 3. render()方法中的一些约束
-//    - 第三个参数
+//    - 第三个参数 -> children
 //      - {String | Array}
 //      - 子级虚拟节点 (VNodes)，由 `crateElement()` 构建而成，也可以使用字符串来生成“文本虚拟节点”。可选
-// - 参数注意点
+// 3. 参数注意点
 //  - 第二个和点三个参数是可选的
 //  - 当只有两个参数时，第二个参数会被当作第三个参数来处理
 // - createElement的一些使用方式
@@ -57,6 +57,10 @@ const ALWAYS_NORMALIZE = 2
 //    - 3. createElement('div', {class, style, ...}, 'text1')
 //    - 4. createElement({data, props, ...}, 'text')
 //    - ...
+// 4. 案例
+//  - 官网： https://cn.vuejs.org/v2/guide/render-function.html#createElement-%E5%8F%82%E6%95%B0
+//  - https://github.com/woow-wu7/6-review/blob/main/STEP_20220319/vue/%E6%89%8B%E5%86%99render%E5%87%BD%E6%95%B0.html
+//  - 本项目中的 index-test.html ( 重点看 props, scopeSlots, on, attrs, class, style )
 
 /**
  * isPrimitive
@@ -73,22 +77,30 @@ const ALWAYS_NORMALIZE = 2
 //    typeof value === 'boolean'
 //  )
 // }
+
+// vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false) ------------- template
+// vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true) -- 手写render
 export function createElement (
-  context: Component,
+  context: Component, // vm
   tag: any, // String | Object | Function
   data: any,
   children: any,
   normalizationType: any,
   alwaysNormalize: boolean
 ): VNode | Array<VNode> {
-  if (Array.isArray(data) || isPrimitive(data)) { // data 是 数组 或者 原始值
+  if (Array.isArray(data) || isPrimitive(data)) {
+    // data 是 数组 或者 原始值
+    // primitive 是原始的 的意思
+
+    // 如果data是数据或原始值，就参数重载
     normalizationType = children // 第五个参数 换成 第四个参数
     children = data // 第四个参数 换成 第三个参数
     data = undefined // 第三个参数 换成 undefined
 
-    // 也就是说：当我们使用render(createElement)
+    // 也就是说：当我们使用 render(createElement)
     //  - 1. createElement('div', 'text1text2') 中的第二个参数会作为 这里的第三个参数(源码中的第四个参数) children来处理
     //  - 2. createElement('div', [createElement()]) 中的第二个参数会作为 这里第三个参数(源码中的第四个参数) children来处理
+    //  - 因为 12 的第二个参数，即 data 是字符串和数组
   }
   if (isTrue(alwaysNormalize)) {
     normalizationType = ALWAYS_NORMALIZE
@@ -103,6 +115,8 @@ export function _createElement (
   children?: any,
   normalizationType?: number
 ): VNode | Array<VNode> {
+
+  // vnode data 不能是响应式的
   if (isDef(data) && isDef((data: any).__ob__)) {
     process.env.NODE_ENV !== 'production' && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +

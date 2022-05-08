@@ -61,8 +61,15 @@ export function initLifecycle (vm: Component) {
 }
 
 export function lifecycleMixin (Vue: Class<Component>) {
+
+  // _update ----------------------------------------------------------------------
   // 1
-  // _update
+  // _update方法执行的时机
+  // - 首次渲染时
+  // - 数据变化从新渲染时
+  // 2
+  // 总体流程
+  // new Vue() -> this._init() -> vm.$mount -> new Watcher(vm, updateComponent) -> vm._update(vm._render(), hydrating)
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     const prevEl = vm.$el
@@ -226,6 +233,10 @@ export function mountComponent (
       // - 文件位置：src/core/instance/render.js
       // 4
       // updateComponent 其实就是执行了一次真实的渲染
+      // 5
+      // vm._update 调用的时机
+      // - 初始渲染的时候
+      // - 当数据变化，重新渲染的时候
     }
 
   }

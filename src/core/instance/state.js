@@ -43,15 +43,18 @@ const sharedPropertyDefinition = {
 }
 
 // proxy
-// proxy(vm, `_data`, key)
+// proxy (vm, `_data`, key)
+// proxy (target: Object, sourceKey: string, key: string)
 // 主要作用
 // - proxy函数的主要作用是
 //  - 做了一层代理
 //  - this.name === vm.name === vm._data.name === vm.$options.data.name === vm.$data.name
 export function proxy (target: Object, sourceKey: string, key: string) {
+  // get
   sharedPropertyDefinition.get = function proxyGetter () {
-    return this[sourceKey][key]
+    return this[sourceKey][key] // this._data.key
   }
+  // set
   sharedPropertyDefinition.set = function proxySetter (val) {
     this[sourceKey][key] = val
   }
@@ -63,7 +66,42 @@ export function proxy (target: Object, sourceKey: string, key: string) {
   Object.defineProperty(target, key, sharedPropertyDefinition)
   // vm[key] === vm._data[key]
   // 因为： vm._data = vm.$options.data
-  // 所以：vm[key] === vm._data[key] === vm.$data[key] === vm.$options.data[key]
+  // 所以：vm[key] === vm._data[key] === vm.$options.data[key] === vm.$data[key]
+
+  // Object.definedProperty
+  // 作用：
+  //  - 1.直接在一个对象上定义一个新属性
+  //  - 2.或修改一个对象的现有属性
+  //  - 3.并返回此对象
+  // 语法：
+  // Object.defineProperty(obj, prop, descriptor)
+  // - descriptor 表示 ( 属性描述符 )，有 ( 两种形式，只能是其中一种，不能同时存在 )
+  //  - 两种形式：数据描述符 和 存取描述符
+  //    - 数据描述符对象属性：value 属性对应的值, writable 是否可以修改value
+  //    - 存取描述符对象属性：get, set
+  //    - 共享的描述符属性：
+  //      - configurable：是否可以修改属性描述符，true时可以修改，可以删除对象上的该属性
+  //        - 1. 对象的属性是否可以被删除
+  //        - 2. 除 value 和 writable 特性外的其他特性是否可以被修改
+  //      - enumerable：是否可枚举
+  //        - 1. 可枚举的属性可以被 ( for..in ) 和 ( Object.keys() ) 遍历到
+  //        - 2. 不可枚举的属性却可以被 ( Reflect.ownKeys() ) 遍历到
+  //        - 扩展
+  //          - Reflect.ownKey()
+  //            - 可以遍历 Symbol 类型的 key
+  //            - 可以遍历 不可枚举的 key
+  //          - for...in 和 Object.keys() 两者都不能遍历 不可枚举属性 和 symbol类型的属性
+  //        - 扩展
+  //           - Object.getOwnPropertyNames() 遍历 自身属性 + 可枚举属性 + 不可枚举属性
+  //           - Object.keys() 遍历自身属性 + 可枚举属性
+  //           - for...in 遍历自身 + 继承的属性 + 可枚举的属性
+  //           - key in Object 自身 + 继承的属性
+  //  - 总结
+  //    - 布尔值类型 ( 默认值都是false )：configurable enumerable writable
+  //    - 属性值或函数键 ( 默认值都是undefined )：value get set
+  // - 链接
+  //    - https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty
+  //    - 本项目 index-test.html
 }
 
 
@@ -72,21 +110,21 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options // 获取vm中传入的配置对象 options
-  if (opts.props) initProps(vm, opts.props) // ------------ initProps
-  if (opts.methods) initMethods(vm, opts.methods) // ------ initMethods
+  if (opts.props) initProps(vm, opts.props) // ------------ 1. initProps
+  if (opts.methods) initMethods(vm, opts.methods) // ------ 2. initMethods
 
   if (opts.data) {
     initData(vm)
-    // ---------------------------------------------------- initData
+    // ---------------------------------------------------- 3. initData
   } else {
     // data 不存在，传入 ( 空对象 ) 作为初始化data -> 进行observe
     observe(vm._data = {}, true /* asRootData */)
   }
 
-  if (opts.computed) initComputed(vm, opts.computed) // --- initComputed
+  if (opts.computed) initComputed(vm, opts.computed) // --- 4. initComputed
 
   if (opts.watch && opts.watch !== nativeWatch) {
-    initWatch(vm, opts.watch) // -------------------------- initWatch
+    initWatch(vm, opts.watch) // -------------------------- 5. initWatch
     // 1
     // watch存在，并且不是原生的对象上的watch属性，就初始化 watch
     // 2
@@ -253,7 +291,7 @@ function initData (vm: Component) {
       // vue 中 $ 和 _ 是保留字
       // 3
       // proxy 的作用：vm[key] = vm._data'[key]，即将data中的属性代理到vm上
-      // vm[key] === vm._data[key] === vm.$data[key] === vm.$options.data[key]
+      // vm[key] === vm._data[key] === vm.$data[key] === vm.$options.data[key] === vm.$data[key]
       proxy(vm, `_data`, key)
     }
   }

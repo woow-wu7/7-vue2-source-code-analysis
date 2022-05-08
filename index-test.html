@@ -48,17 +48,130 @@
           //  2. vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
           //  3. 所以：最终就是调用 createElement()
 
+          // createElement
+          // createElement(tag, data, children)
           return createElement(
+            // ++ tag 是 字符串，对象，resolve了上述任何一种的一个async函数
             "div",
+            // ++ data 数据对象，一个与模板中 attribute 对应的数据对象
             {
+              class: ["classA", "classB"], // 相当于 v-bind:class -> 接受一个字符串、对象或字符串和对象组成的数组
+              style: {
+                background: "red", // ------- 相当于 v-bind:style -> 接受一个字符串、对象，或对象组成的数组
+                padding: "20px",
+              },
+              // 1
+              // attrs
+              // - 注意：
+              //   - style 和 class ---------- 不在 attrs 中
+              //   - 但是 id ----------------- 在 attrs 中
               attrs: {
-                id: "#app1",
+                id: "#app2",
+                // class: 'classC' 这里写class不生效
+                "data-attribute": "custom-attribute", // 自定义属性
+              },
+              on: {
+                // 事件
+                click() {
+                  console.log("click");
+                },
               },
             },
-            this.count + 1
+            // ++ children 数组
+            [
+              this.count + 1,
+              createElement(
+                // == tag 是 组件选项对象
+                {
+                  name: "Child2",
+                  props: {
+                    // 组件接受的 prop name，通过createElement(tag,data,children)的第二个参数data数据对象来指定
+                    name: String,
+                  },
+                  template: `
+                  <div>
+                    <p>组件获取到的props -> 值通过createElement(tag,data,children)的第二个参数data来指定，{{name}}</p>
+                    <slot></slot>
+                  </div>
+                  `,
+                },
+                // == data 数据对象，和 template attribute 对应
+                {
+                  props: {
+                    name: "woow_wu7", // 传入组件的 name 属性的值
+                  },
+                  scopedSlots: {
+                    default: (props) => createElement("span", "这是插槽的内容"),
+                  },
+                }
+              ),
+            ]
           );
         },
       });
+    </script>
+
+    <script>
+      // 1
+      // 测试 Object.defineProperty ------------------------------------------------------ writable
+      const obj1 = {};
+      Object.defineProperty(obj1, "a", {
+        value: 10,
+        writable: false, // 表示value不能被修改
+      });
+      console.log("obj1.a - 修改前", obj1.a); // 10
+      obj1.a = 20; // 修改无效
+      console.log("obj1.a - 修改后", obj1.a); // 20
+    </script>
+
+    <script>
+      // 2
+      // 测试 Object.defineProperty ------------------------------------------------------ enumerable
+      const obj2 = {
+        a: 10,
+        b: 20,
+        [Symbol("d")]: 40,
+      };
+      Object.defineProperty(obj2, "c", {
+        value: 30,
+        enumerable: false,
+        // 表示c属性是 不可枚举的
+        // 1. 不可枚举的属性不能被 ( for... in ) 和 ( Object.keys() ) 遍历到
+        // 2. 但是可以被 Reflect.ownKeys() 遍历到
+      });
+
+      // for...in
+      // 不能遍历 不可枚举属性 和 Symbol类型的属性
+      for (let i in obj2) {
+        console.log("i", i); // a, b
+      }
+
+      // Object.keys(obj)
+      // 不能遍历 不可枚举属性 和 Symbol类型的属性
+      const keys = Object.keys(obj2);
+      console.log("keys", keys); // 10 20
+
+      // Reflect.ownKeys(obj)
+      // 可以遍历 不可枚举属性 和 Symbol类型的属性
+      const ownKeys = Reflect.ownKeys(obj2);
+      console.log("ownKeys", ownKeys); // 'a', 'b', 'c', Symbol(d)
+    </script>
+
+    <script>
+      // 3
+      // 测试 Object.defineProperty ----------------------------------------------------- configurable
+      const obj3 = {
+        a: 10,
+        b: 20,
+      };
+      Object.defineProperty(obj3, "c", {
+        value: 30,
+        configurable: false,
+        // c 属性是否可以被删除
+        // 除 value 和 writable 特性外的其他特性是否可以被修改
+      });
+      delete obj3.c;
+      console.log("obj3.c", obj3.c); // 30，还是存在，没有被删除
     </script>
   </body>
 </html>

@@ -241,11 +241,11 @@ export default class Watcher {
     const id = dep.id
     if (!this.newDepIds.has(id)) {
       this.newDepIds.add(id)
-      this.newDeps.push(dep)
+      this.newDeps.push(dep) // 向当前正在计算的 watcher 的 newDeps 中添加 dep
       if (!this.depIds.has(id)) {
         dep.addSub(this)
         // this ------> 指 watcher
-        // 向 dep 的 subs 中添加 watcher
+        // 向 dep 的 subs 中添加正在计算的 watcher
       }
     }
   }

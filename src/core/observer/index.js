@@ -45,11 +45,11 @@ export class Observer {
   vmCount: number; // number of vms that have this object as root $data
 
   constructor (value: any) {
-    this.value = value
+    this.value = value // 比如 new Vue({data}) 中的 data
 
     this.dep = new Dep()
     // this.dep
-    // - 每个 ( 对象或数组 ) 都对应一个 ( dep ) 实例
+    // - 表示：每个 ( 对象或数组 ) 都对应一个 ( dep ) 实例
     // - 什么意思：就是data，以及data属性是一个对象和数组的属性都会有对应的dep实例
     // 1
     // - dep 中有哪些属性？
@@ -61,24 +61,31 @@ export class Observer {
     //      - depend notify
     // 2
     // - dep 主要用来做什么
-    //    - 用来关联 ( data||data属性 ) <---> dep <---> watcher
+    //    - 用来关联 ( data || data属性 ) <---> dep <---> watcher
     //    - dep.depend() ---> watcher.addDep(dep) ---> dep.addSubs(watcher)
     //    - 做依赖收集和派发更新
     // 3
     // dep => Observer 类中的 dep 主要是为了通过 value.__ob__.dep.depend 的方法来做依赖收集
+    // 4
+    // dep 和 watcher 是如何相互订阅的？
+    // - 向 watcher 的 newDeps 中添加 dep
+    // - 向 dep 的 subs 中添加 watcher
 
 
     this.vmCount = 0
     def(value, '__ob__', this)
-    // value.__ob__ = this，不可枚举，初始化时value是data
     // this 指的是 observer 实例
+    // value.__ob__ = this，不可枚举，初始化时value是data
+    // - 不可枚举的属性不能被 for...in 和 Object.keys() 遍历
+    // - 但是可以被 Reflect.ownKeys() 遍历
+    // - 扩展：对象Symbol类型的key 在 for...in 和 Object.keys() 和 Reflect.ownKeys() 遍历时的差异性
     // 1
     // def
     // export function def (obj: Object, key: string, val: any, enumerable?: boolean) {
     //   Object.defineProperty(obj, key, {
     //     value: val,
-    //     enumerable: !!enumerable,
     //     writable: true,
+    //     enumerable: !!enumerable,
     //     configurable: true
     //   })
     // }
@@ -91,7 +98,7 @@ export class Observer {
     // 这里def的第四个参数不存在，说明 __ob__ 属性是不可枚举的，所以不能被
     // - Object.keys() 遍历自身属性 + 可枚举属性
     // - Object.getOwnPropertyNames() 遍历 自身属性 + 可枚举属性 + 不可枚举属性
-    // - for...in 遍历自身 + 继承的属性
+    // - for...in 遍历自身 + 继承的属性 + 可枚举的属性
     // - key in Object 自身 + 继承的属性
     if (Array.isArray(value)) {
       if (hasProto) {
@@ -298,7 +305,7 @@ export function defineReactive (
   // 继续观测对象的每一项的value值,如果还是对象就继续观察 添加响应Object.defineProperty
   // shallow：是浅的意思，表示不是浅观察的的话
 
-  // 依赖收集 和 派发更新
+  // depend依赖收集 和 notify派发更新
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,

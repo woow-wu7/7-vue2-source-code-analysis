@@ -60,11 +60,11 @@ export function initRender (vm: Component) {
   // internal version is used by render functions compiled from templates
 
   // createElement文件位置 --> src/core/vdom/create-element.js
-  vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false) // ------------------ template模版编译时使用
+  vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false) // ------------- template模版编译时使用
 
   // normalization is always applied for the public version, used in
   // user-written render functions.
-  vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true) // ------- 手写render函数时使用
+  vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true) // - 手写render函数时使用
   // 1
   // vm._c ----------------------> template编译时使用
   // vm.$createElement ----------> 手写render时编译时使用

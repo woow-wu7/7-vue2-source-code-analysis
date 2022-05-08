@@ -1,5 +1,6 @@
 /* @flow */
 
+// virtual dom 虚拟DOM
 export default class VNode {
   tag: string | void;
   data: VNodeData | void;
