@@ -46,10 +46,28 @@ export default class Watcher {
 
   constructor (
     vm: Component,
-    expOrFn: string | Function, // 表达式 || 函数 2. watch时expOrFn是watch对象中的key字符串 3.渲染watcher时expOrFn是一个函数，即updateComponent = () => { vm._update(vm._render(), hydrating) }
-    cb: Function, // 1. computed没有cb，2. watch的cb就是watch对象中key对应的 --- key变化时执行的函数 3. 渲染watcher时，cd是noop空函数
-    options?: ?Object, // 1. 渲染watcher时，首次渲染时 options 是一个具有 before 方法的对象
-    isRenderWatcher?: boolean // isRenderWatcher 是否是 renderWatcher 渲染watcher 的标志位
+    expOrFn: string | Function,
+    // expOrFn
+    // - 表达式 || 函数
+    // - 1. computedWatcher 时，expOrFn 是 function
+    //      - 1. 是 computed对象中 key 对应的 方法
+    //      - 2. 是 computed对象中 key 对应的 对象中的 get 方法
+    //      - 3. 因为 computed 对象中的 key 对应的值，可以是一个function||object
+    // - 2. userWatcher 时，expOrFn是watch对象中的key字符串
+    // - 3. renderWatcher 时，expOrFn是 function，即 updateComponent = () => { vm._update(vm._render(), hydrating) }
+
+    cb: Function,
+    // 1. computed时cb是一个noop空函数，
+    // 2. watch的cb就是watch对象中key对应的 --- key变化时执行的函数
+    // 3. 渲染watcher时，cd是noop空函数
+
+    options?: ?Object,
+    // 1. computedWatcher时，options是 { lazy: true }
+    // 2. userWatcher时，options是 { user: true }
+    // 3. renderWatcher时，首次渲染时 options 是一个具有 before 方法的对象
+
+    isRenderWatcher?: boolean
+    // isRenderWatcher 是否是 renderWatcher 渲染watcher 的标志位
     // isRenderWatcher
     // 1. 表示是否是renderWatcher，---> 即是否是渲染watcher
     // 2. computedWatcher ----------> 没有传该参数即为undefined
@@ -73,6 +91,7 @@ export default class Watcher {
 
     this.cb = cb
     // 第三个参数
+    // - computed watcher -> cb 是一个空函数
     // - render watcher -> mount阶段，cb是一个noop空函数
     // - user watcher -> mount阶段，cb是一个函数，即watch对象中的key对象的handler函数
 

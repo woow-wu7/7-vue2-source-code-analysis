@@ -347,7 +347,13 @@ function initComputed (vm: Component, computed: Object) {
   const isSSR = isServerRendering() // 是否是服务端渲染
 
   for (const key in computed) {
-    const userDef = computed[key] // compute对象中的每个方法
+    const userDef = computed[key]
+    // userDef
+    // - compute对象中的每个属性
+    //   - function: 属性可以是 一个函数，即getter函数
+    //   - object: 也可以是一个具有 get set 的对象
+    //   - 属性签名：{ [key: string]: Function | { get: Function, set: Function } }
+    //   - 官网：https://cn.vuejs.org/v2/api/#computed
 
     const getter = typeof userDef === 'function' ? userDef : userDef.get
     // getter
@@ -377,14 +383,17 @@ function initComputed (vm: Component, computed: Object) {
       //   computed: {
       //     reversedMessage: function () {
       //       return this.message.split('').reverse().join('')
-      //     }
+      //     },
+      //    arrFn: (vm) => vm.message + 'is arrow function'
       //   }
       // })
       watchers[key] = new Watcher(
         vm,
         getter || noop, // computed对象中的 方法
-        noop, // computed没有回调函数
-        computedWatcherOptions // const computedWatcherOptions = { lazy: true } 配置对象，computed watcher lazy=true
+        noop, // computed的回调函数，是一个空函数
+        computedWatcherOptions
+        // const computedWatcherOptions = { lazy: true } 配置对象
+        // computed watcher lazy=true
       )
     }
 
@@ -415,7 +424,10 @@ function initComputed (vm: Component, computed: Object) {
 export function defineComputed (
   target: any, // vm
   key: string, // computed对象中的每个key
-  userDef: Object | Function // computed中的方法，或者computed中的属性对象中的get属性(因为computed也能set，但主要是get)
+  userDef: Object | Function
+  // userDef
+  // - computed中的方法
+  // - 或者computed中的属性对象中的get属性(因为computed也能set，但主要是get)
 ) {
   const shouldCache = !isServerRendering()
   // shouldCache
@@ -447,6 +459,7 @@ export function defineComputed (
       )
     }
   }
+
   Object.defineProperty(target, key, sharedPropertyDefinition)
   // 定义响应式 computed
   // 将 computed 对象定义成响应式对象
@@ -463,6 +476,7 @@ function createComputedGetter (key) {
     // 1. const watchers = vm._computedWatchers = Object.create(null)
     // 2. watchers[key] = new Watcher()
     // 3. 结论：通过1和2，得出 vm._computedWatchers[key] 可以访问到 new Watcher()
+    // 3. 杰伦：所以这里的 watcher 就是 每个computedWatcher
     // 4. 原因：
     //  - 因为 watchers 和 this._computedWatchers 是都变量
     //  - vm._computedWatchers 是一个引用类型
@@ -472,6 +486,8 @@ function createComputedGetter (key) {
     if (watcher) {
       if (watcher.dirty) {
         // computed watcher 的初始化时 dirty=true
+        // 即：if表示的是，如果是一个computedWatcher
+
         // 注意：dirty是动态在修改的，evaluate之前是true，evaluate之后该为false
         // 1. 默认初始化时，computed watcher 的 dirty=true
         // 2. 当 dirty=true 就会执行 watcher.evaluate()
@@ -506,7 +522,11 @@ function createComputedGetter (key) {
       if (Dep.target) { // 正在执行的watcher，是渲染watcher
         watcher.depend()
       }
-      return watcher.value // 计算的结果，evaluate() 方法中计算了value的值，下次在访问该computed，就会直接返回，而不会再重新通过 watcher.get() 重新计算
+
+      return watcher.value
+      // 计算的结果，evaluate() 方法中计算了value的值
+      // 描述：下次再访问该computed，就会直接返回，而不会再重新通过 watcher.get() 重新计算
+      // 因为： watcher.evaluate() 后修改了 dirty=false
     }
   }
 }
@@ -553,9 +573,11 @@ function initWatch (vm: Component, watch: Object) {
     const handler = watch[key]
     // handler
     // - 获取watcher对象中的key对应的数据
-    // - handler可的类型：
-    //    - function string array object
-    //    - 是object时，属性有 handler，deep，immediate，sync
+    // - handler的类型：
+    //    - function string object array
+    //    - 是 object 时，属性有 handler，deep，immediate，sync
+    //    - 是 string 时，表示的是 method 名
+    //    - 是 function 时，参数是 function (val, oldVal) {...}
 
     if (Array.isArray(handler)) { // ------------------ handler是数组
       for (let i = 0; i < handler.length; i++) {
@@ -573,7 +595,7 @@ function initWatch (vm: Component, watch: Object) {
 function createWatcher (
   vm: Component,
   expOrFn: string | Function, // watch.key
-  handler: any, // watch.value
+  handler: any, // watch.value ---> function string object
   options?: Object
 ) {
   if (isPlainObject(handler)) { // ------------------- handler是对象，纯对象 ( 对象字面量 或 Object.create() )
@@ -590,7 +612,7 @@ function createWatcher (
   return vm.$watch(expOrFn, handler, options)
   // expOrFn -> key
   // handler -> value -> handler都已经处理成了一个函数
-  // vm.$watch 在本文件的最底部位置定义的
+  // 文件位置：vm.$watch 在本文件的最底部位置定义的
 }
 
 export function stateMixin (Vue: Class<Component>) {
@@ -641,7 +663,8 @@ export function stateMixin (Vue: Class<Component>) {
     // options
     // - 注意：如果watch对象中属性对应的是一个对象时，对象中的属性会合并到options中
 
-    const watcher = new Watcher(vm, expOrFn, cb, options) // user=true，说明是一个 userWatcher，即用来出来 watch 相关的逻辑
+    const watcher = new Watcher(vm, expOrFn, cb, options)
+    // user=true，说明是一个 userWatcher，即用来出来 watch 相关的逻辑
 
     // immediate 表示立即执行 watch 中的 handler 函数
     if (options.immediate) {

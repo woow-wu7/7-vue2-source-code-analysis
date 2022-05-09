@@ -33,6 +33,9 @@
             count: 1,
           };
         },
+        computed: {
+          doubleCount: (vm) => vm.count * 2,
+        },
         beforeCreate() {
           console.log("this.count", this.count); // 访问不到，beforeCreate -> initState -> created
         },
@@ -79,7 +82,8 @@
             },
             // ++ children 数组
             [
-              this.count + 1,
+              `count: ${this.count}`,
+              `doubleCount: ${this.doubleCount}`,
               createElement(
                 // == tag 是 组件选项对象
                 {
