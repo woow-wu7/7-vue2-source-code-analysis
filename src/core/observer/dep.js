@@ -68,7 +68,7 @@ export default class Dep {
   // notify
   // 派发更新
   notify () {
-    // stabilize the subscriber list first
+    // stabilize the subscriber list first // 固定住 subscriber，即浅拷贝
     const subs = this.subs.slice() // 浅拷贝
     if (process.env.NODE_ENV !== 'production' && !config.async) {
       // subs aren't sorted in scheduler if not running async

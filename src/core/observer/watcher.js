@@ -273,14 +273,13 @@ export default class Watcher {
 
   /**
    * Subscriber interface.
-   * Will be called when a dependency changes.
+   * Will be called when a dependency changes. 依赖变化时从新被执行
    */
   update () {
     /* istanbul ignore else */
-    if (this.lazy) {
-      this.dirty = true // this.dirty = this.lazy
-    } else if (this.sync) {
-      // watch，优先执行
+    if (this.lazy) { // ------ computedWatcher 时 lazy=true
+      this.dirty = true
+    } else if (this.sync) { // watchWatcher时，sync情况的处理，优先执行
       this.run()
     } else {
       queueWatcher(this)
@@ -292,6 +291,9 @@ export default class Watcher {
    * Will be called by the scheduler.
    * 在调度中被回调调用
    */
+  // 1 派发更新的流程
+  // -> dep.subs -> watcher.update -> queueWatcher() -> flushSchedulerQueue() ->
+  // -> watcher.run() -> watcher.get() -> vm._update(vm._render(), hydrating)
   run () {
     if (this.active) {
       const value = this.get()

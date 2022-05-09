@@ -45,7 +45,10 @@ export class Observer {
   vmCount: number; // number of vms that have this object as root $data
 
   constructor (value: any) {
-    this.value = value // 比如 new Vue({data}) 中的 data
+    this.value = value
+    // value
+    // - 比如 new Vue({data}) 中的 data
+    // - 或者 data种的属性还是 对象或数组
 
     this.dep = new Dep()
     // this.dep
@@ -74,12 +77,31 @@ export class Observer {
 
     this.vmCount = 0
     def(value, '__ob__', this)
-    // this 指的是 observer 实例
+    // def的作用
+    // - 给 value 添加 __ob__ 属性，值是 observer 实例，不可枚举
+    // - 相当于 value.__ob__ = this
+    // - value在初始化时指的是 data
+    // - this 指的是 observer 实例
+    // - value.__ob__ 的 __ob__ 属性是不可枚举的，因为第四个参数是 undefined
+    // - ！！！注意：这里的value不一定是data对象，因为data会递归的执行，这里的value也可能是value中的属性
+
+    // 注意
+    // 1.  __ob__ 属性只有被观察过的 对象或数组才具有
+    // 2. value.__ob__ 的 __ob__ 属性是不可枚举的，因为第四个参数是 undefined
+
+    // 扩展
     // value.__ob__ = this，不可枚举，初始化时value是data
     // - 不可枚举的属性不能被 for...in 和 Object.keys() 遍历
     // - 但是可以被 Reflect.ownKeys() 遍历
-    // - 扩展：对象Symbol类型的key 在 for...in 和 Object.keys() 和 Reflect.ownKeys() 遍历时的差异性
-    // 1
+    // - 扩展：对象Symbol类型的key 在 for...in 和 Object.keys() 和 Reflect.ownKeys() 和 Object.getOwnPropertyNames() 遍历时的差异性
+
+    // 扩展
+    // 这里def的第四个参数不存在，说明 __ob__ 属性是不可枚举的，所以不能被
+    // - Object.keys() 遍历自身属性 + 可枚举属性
+    // - Object.getOwnPropertyNames() 遍历 自身属性 + 可枚举属性 + 不可枚举属性
+    // - for...in 遍历自身 + 继承的属性 + 可枚举的属性
+    // - key in Object 自身 + 继承的属性
+
     // def
     // export function def (obj: Object, key: string, val: any, enumerable?: boolean) {
     //   Object.defineProperty(obj, key, {
@@ -89,23 +111,14 @@ export class Observer {
     //     configurable: true
     //   })
     // }
-    // 2
-    // def的作用
-    // - 给 value 添加 __ob__ 属性，值是 observer 实例
-    // - value.__ob__ = observer实例
-    // - ！！！注意：这里的value不一定是data对象，因为data会递归的执行，这里的value也可能是value中的属性
-    // 3
-    // 这里def的第四个参数不存在，说明 __ob__ 属性是不可枚举的，所以不能被
-    // - Object.keys() 遍历自身属性 + 可枚举属性
-    // - Object.getOwnPropertyNames() 遍历 自身属性 + 可枚举属性 + 不可枚举属性
-    // - for...in 遍历自身 + 继承的属性 + 可枚举的属性
-    // - key in Object 自身 + 继承的属性
+
+    // -------------------------------------------------------- 1. value 是数组
     if (Array.isArray(value)) {
       if (hasProto) {
         // 1
         // hasProto
         // export const hasProto = '__proto__' in {}
-        // 表示该环境中存在 __proto__属性，说明是浏览器环境
+        // 表示：该环境中存在 __proto__ 属性，说明是浏览器环境
         // 注意：in 会包含 自身属性+继承的属性
         // 2
         // in
@@ -130,13 +143,19 @@ export class Observer {
         //     def(target, key, src[key])
         //   }
         // }
+
         protoAugment(value, arrayMethods) // ------------------ 如果是数组并且__proto__存在
-        // 1
+        // 2
+        // protoAugment
+        // protoAugment(value, arrayMethods)
+        // function protoAugment (target, src: Object) {
+        //   target.__proto__ = src
+        // }
+        // 作用：让value继承了重写的7中数组方法的对象
+
+        // 2
         // arrayMethods
         // - 是一个数组，上面从写了7种数组中的方法，然后对添加的成员继续observe，并且手动dep.notify()
-        // 2
-        // protoAugment(value, arrayMethods)
-        // - 的作用就是：让value继承了重写的7中数组方法的数组
       } else {
         // 不存在 {}.__proto__
         copyAugment(value, arrayMethods, arrayKeys) // -------- 如果是数组并且不存在__proto__
@@ -156,6 +175,7 @@ export class Observer {
       // 1. 这里观测是是 value 本身
       // 2. 在 arrayMethods 上也进行了观测，观测的是 添加方法push，unshift, splice 包装成的数组，并且手动dep.notify()
     } else {
+      // ------------------------------------------------------ 2. value 是对象
       // 观测 - 对象
       // value 不是数组，则 观测对象
       // - 说明 value 是一个对象
@@ -184,7 +204,9 @@ export class Observer {
    */
   observeArray (items: Array<any>) {
     for (let i = 0, l = items.length; i < l; i++) {
-      observe(items[i]) // 观测数组每个成员，在observe中会做 ( 依赖收集 ) 和 ( 派发更新 ) 的流程
+      observe(items[i])
+      // 观测数组每个成员，在observe中会做 ( 依赖收集 ) 和 ( 派发更新 ) 的流程
+      // 注意点：这里观察的是数组成员，但是只有数组成员还是 ( 对象或数组 ) 时在observe中才会继续往下做处理
     }
   }
 }
@@ -228,13 +250,15 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     // 如果 value 不是一个 ( 对象 或 数组 ) 或者 ( 是一个 VNode 实例 )，则直接返回
     // 注意：
     //  - 这里value可以是对象，也可以是数组
-    //  - 为什么这里可以是数组？
-    //    - 因为除了 ( data本身可以进行observe() )，( data的属性属性也会observe() )，只是必须是对象和数组，不然会直接return
-    return
+    //  - 问题：为什么这里可以是数组？
+    //  - 回答：因为除了 ( data本身可以进行observe() )，( data的属性属性也会observe() )，只是必须是对象和数组，不然会直接return
+
+    // isObject
     // export function isObject (obj: mixed): boolean %checks {
     //   return obj !== null && typeof obj === 'object'
     //   其实就是 object 和 array
     // }
+    return
   }
   let ob: Observer | void
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
@@ -315,7 +339,7 @@ export function defineReactive (
       if (Dep.target) { // ---------------------------- 当前正在观察的watcher
         dep.depend() // ------------------------------- 依赖收集
         if (childOb) { // ----------------------------- 如果子的 ob 存在，observer() 会返回ob，ob其实就是Observer构造函数执行生成的实例
-          childOb.dep.depend() // --------------------- 继续做依赖收集
+          childOb.dep.depend() // --------------------- 继续做依赖收集，如果val还是一个对象或者数组并且未被observer
           if (Array.isArray(value)) {
             dependArray(value) // --------------------- 每个成员满足条件逐个做依赖收集
             // function dependArray (value: Array<any>) {

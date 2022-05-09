@@ -7,9 +7,9 @@ import { def } from '../util/index'
 
 const arrayProto = Array.prototype
 export const arrayMethods = Object.create(arrayProto)
-// arrayMethods
+// arrayMethods 对象
 // - Object.create(Array.prototype) 用于生成一个空对象，空对象的原型对象是Array.prototype
-// - 所以：arrayMethods 继承了 Array.prototype 上的所有属性和方法
+// - 所以：arrayMethods对象 继承了 Array.prototype 上的所有属性和方法
 // - 然后：在下面会通过 def 方法来改写原生的方法
 
 // 7 种原生数组方法
@@ -41,38 +41,59 @@ methodsToPatch.forEach(function (method) {
   // }
 
   // def
-  // 真正的修改数组7种方法的地方
+  // 函数签名：function def (obj: Object, key: string, val: any, enumerable?: boolean)
+  // 真正的重写数组7种方法的地方
+  // 这里的作用：给 arrayMethods 对象上添加 7 种方法
+
   def(arrayMethods, method, function mutator (...args) {
     const result = original.apply(this, args) // 执行原生方法获得的结果
 
     const ob = this.__ob__
     // this指的是 arrayMethods，而 __ob__ 属性对应的就是 observer 实例值
 
-    let inserted // inserted是一个数组 或者就是在不满足所有switch条件时，未被赋值则是undefined
+    // inserted
+    // - 是一个数组 或者就是在不满足所有switch条件时，未被赋值则是undefined
+    // - 表示：7种方法中 ( 添加 ) 相关的方法 (push,unshift,splice) 需要添加的 参数，将需要添加的参数包装成数组
+    let inserted
+
+    // switch中的都是数组添加的方法，inserted就是需要添加的值，字面意思就是需要插入的值
     switch (method) {
       case 'push':
       case 'unshift':
         inserted = args // 传入push和unshift的参数，即需要添加的值，包装成数组
         break
       case 'splice':
-        inserted = args.slice(2) // splice(start, count, addElement1, addElement2) 所以这里去除了前两个参数后，后面的参数就是要添加的参数，包装成数组
+        inserted = args.slice(2)
+        // splice(start, count, addElement1, addElement2)
+        // 所以这里去除了前两个参数后，后面的参数就是要添加的参数，包装成数组
         break
-      // switch中的都是数组添加的方法，inserted就是需要添加的值，字面意思就是需要插入的值
     }
 
     if (inserted) ob.observeArray(inserted)
-    // 0
+    // 1
+    // ob.observeArray
+    // observeArray (items: Array<any>) {
+    //   for (let i = 0, l = items.length; i < l; i++) {
+    //     observe(items[i])
+    //     观测数组每个成员，在observe中会做 ( 依赖收集 ) 和 ( 派发更新 ) 的流程
+    //   }
+    // }
+
+    // 2
     // observer实例上具有observeArray原型链上的属性
     // ob.observeArray(inserted) -> observe(items[i]) 继续走一个完整的响应式对象的流程
-    // 1
+
+    // 3
     // 观测数组，传入数组方法的参数
     // 问题：这里为什么只传入 ( 添加进输入的成员组成的数组 ) ？
     // 回答：因为这里是添加操作的处理，即必须满足switch中的条件时才会执行 ob.observeArray(inserted) 操作，就是观察新添加进的值
 
-    // 2
+    // 4
     // notify change
     // 手动触发 - 派发更新的过程
     ob.dep.notify()
-    return result // 返回方法执行后的结果
+    return result
+    // 返回方法执行后的结果
+    // 只不过返回原始7种方法执行结果的同时，做了一些依赖收集和手动派发更新的操作
   })
 })
