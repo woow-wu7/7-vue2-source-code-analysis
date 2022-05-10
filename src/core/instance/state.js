@@ -594,7 +594,7 @@ function initWatch (vm: Component, watch: Object) {
 
 function createWatcher (
   vm: Component,
-  expOrFn: string | Function, // watch.key
+  expOrFn: string | Function, // watch 的 key
   handler: any, // watch.value ---> function string object
   options?: Object
 ) {
@@ -644,9 +644,15 @@ export function stateMixin (Vue: Class<Component>) {
   // $watch
   // expOrFn -> key
   // cb -> handler -> value
+  // 1. vm.$watch(expOrFn, handler, options)
   Vue.prototype.$watch = function (
     expOrFn: string | Function, // key
-    cb: any, // handler function
+
+    cb: any,
+    // cb
+    // - handler function
+    // - 已经将 object+string+function 统一都处理成了 function
+
     options?: Object
   ): Function {
     const vm: Component = this
@@ -659,14 +665,20 @@ export function stateMixin (Vue: Class<Component>) {
     }
 
     options = options || {}
-    options.user = true // watch对应的就是 userWatcher
+    options.user = true
+    // options.user
+    // - watch 对应的就是 userWatcher
+
     // options
     // - 注意：如果watch对象中属性对应的是一个对象时，对象中的属性会合并到options中
+    //        - options = handler
+    //        - handler = handler.handler
 
     const watcher = new Watcher(vm, expOrFn, cb, options)
     // user=true，说明是一个 userWatcher，即用来出来 watch 相关的逻辑
 
-    // immediate 表示立即执行 watch 中的 handler 函数
+    // immediate
+    // - 表示立即执行 watch 中的 handler 函数
     if (options.immediate) {
       const info = `callback for immediate watcher "${watcher.expression}"`
       pushTarget()

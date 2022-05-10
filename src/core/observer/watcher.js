@@ -58,7 +58,7 @@ export default class Watcher {
 
     cb: Function,
     // 1. computed时cb是一个noop空函数，
-    // 2. watch的cb就是watch对象中key对应的 --- key变化时执行的函数
+    // 2. watch的cb就是watch对象中key对应的 --- key变化时执行的函数，这里已经是将watch值的所有类型都处理成了function
     // 3. 渲染watcher时，cd是noop空函数
 
     options?: ?Object,
@@ -79,10 +79,10 @@ export default class Watcher {
     vm._watchers.push(this)
     // options
     if (options) {
-      this.deep = !!options.deep
+      this.deep = !!options.deep // 是 user watcher 相关
       this.user = !!options.user // 是 user watcher 时，user=true，处理 watch 的逻辑
       this.lazy = !!options.lazy // 是 computed watcher 时，lazy=true，处理 computed 的逻辑
-      this.sync = !!options.sync
+      this.sync = !!options.sync // 是 user watcher 相关
       this.before = options.before
     } else {
       this.deep = this.user = this.lazy = this.sync = false
@@ -127,18 +127,19 @@ export default class Watcher {
       this.getter = parsePath(expOrFn)
       // this.getter 在 this.get() 方法中执行
       // parsePath
-      // - 返回的是一个函数，该函数遍历expOrFn分割后的数组
+      // - 返回的是一个函数，该函数遍历expOrFn以 . 分割后的数组
       // - 返回的函数是：return function (obj) { for (let i = 0; i < segments.length; i++) { if (!obj) return obj = obj[segments[i]] } return obj }
       //    - 返回的函数的参数：obj -> 其实就是 vm 实例
-      //    - obj[segments[i]] 其实就是访问到了 data 中的属性，
+      //    - obj[segments[i]] 其实就是访问到了 data 中的属性
+
       // 1
       // path.split('.')
       // 比如 watch 对象中有这样的情况
       //  'a.b'
       //    - { 'a.b': function(newValue, oldValue){...} }
-      //    - ['a', 'b']
+      //    - 得到：['a', 'b']
       //  'c'
-      //    - ['c']
+      //    - 得到：['c']
 
 
       // 2
@@ -225,8 +226,25 @@ export default class Watcher {
       value = this.getter.call(vm, vm)
       // 执行getter()，传入vm作为参数，求值
       // render Watcher 和 user watcher 都会执行 this.getter
-      // - render watcher 的 getter 是 -----> updateComponent = () => { vm._update(vm._render(), hydrating) }
-      // - user watcher 的 getter 是 -------> watcher对象中的 handler方法，即watch对象中执行的函数；并且当我们访问watcher中的属性，比如叫a字符串时，会访问 vm.a 就是对data进行访问，就会触发dep.depend()做依赖收集
+
+      // render watcher 的 getter 是
+      // -> updateComponent = () => { vm._update(vm._render(), hydrating) }
+
+      // user watcher 的 getter 是
+      // -> 是这样一个方法
+      //   function (obj) {
+      //     for (let i = 0; i < segments.length; i++) {
+      //       if (!obj) return
+      //       obj = obj[segments[i]]
+      //     }
+      //     return obj
+      //   }
+      // -> 并且当我们访问watcher中的属性，比如叫a字符串时，会访问 vm.a 就是对data进行访问，就会触发dep.depend()做依赖收集
+
+      // value
+      // 当是 userWatcher 时，value 就是 watch 的 key 对应的 vm[key] = vm.$options.data[key]
+      // 其实就是：data中的属性
+
     } catch (e) {
       if (this.user) {
         handleError(e, vm, `getter for watcher "${this.expression}"`)
@@ -237,7 +255,7 @@ export default class Watcher {
       // "touch" every property so they are all tracked as
       // dependencies for deep watching
       if (this.deep) { // deep用于深层对象的watch
-        traverse(value) // 传入计算的结果值
+        traverse(value) // 传入计算的结果值，即 data 中的属性，该属性还是一个对象
       }
       popTarget() // 出栈
       this.cleanupDeps()
@@ -333,7 +351,8 @@ export default class Watcher {
           const info = `callback for watcher "${this.expression}"`
           invokeWithErrorHandling(this.cb, this.vm, [value, oldValue], this.vm, info)
         } else {
-          this.cb.call(this.vm, value, oldValue) // watch对象中函数被执行，第一个参数是newValue，第二个参数是oldValue
+          this.cb.call(this.vm, value, oldValue)
+          // watch对象中函数被执行，第一个参数是newValue，第二个参数是oldValue
         }
       }
     }

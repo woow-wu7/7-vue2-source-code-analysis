@@ -44,7 +44,7 @@ export function parsePath (path: string): any {
   //  - { 'a.b': function(newValue, oldValue){...} }
   //  - ['a', 'b']
 
-  return function (obj) { // obj 在user watch中是 vm
+  return function (obj) { // 参数 obj 在 user watch中是 vm
     for (let i = 0; i < segments.length; i++) {
       if (!obj) return
       obj = obj[segments[i]]

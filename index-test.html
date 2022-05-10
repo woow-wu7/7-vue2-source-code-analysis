@@ -31,10 +31,34 @@
         data() {
           return {
             count: 1,
+            obj: {
+              key1: 10,
+            },
           };
         },
         computed: {
           doubleCount: (vm) => vm.count * 2,
+        },
+        watch: {
+          obj: {
+            handler: function (newObj, oldObj) {
+              console.log("newObj.key1", newObj.key1);
+              // 注意：
+              // 1 问题
+              // - 我们在changeObj中修改了obj
+              //    - 1. 视图在obj被修改后，重新渲染了
+              //    - 2. 但是这里 并没有 console
+              // 2 如何解决
+              // - watch
+              //    - watch 的 key 对应的 value 是一个对象，具有 handler deep immediate sync 等属性
+            },
+            deep: true
+          },
+        },
+        methods: {
+          changeObj() {
+            this.obj.key1 = 20;
+          },
         },
         beforeCreate() {
           console.log("this.count", this.count); // 访问不到，beforeCreate -> initState -> created
@@ -75,15 +99,14 @@
               },
               on: {
                 // 事件
-                click() {
-                  console.log("click");
-                },
+                click: this.changeObj,
               },
             },
             // ++ children 数组
             [
               `count: ${this.count}`,
               `doubleCount: ${this.doubleCount}`,
+              `obj.key1: ${this.obj.key1}`,
               createElement(
                 // == tag 是 组件选项对象
                 {
