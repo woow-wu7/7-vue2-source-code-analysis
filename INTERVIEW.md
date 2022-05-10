@@ -120,6 +120,29 @@ nextTick
       - requestAnimationFrame
 ```
 
+### (6) Object.defineProperty 的缺点
+
+```
+Object.defineProperty 的缺点
+---
+
+对象
+- 问题：添加和删除属性，不会响应式
+- 解决：
+  - Vue.set()
+  - vm.$set()
+
+数组
+- 问题
+  - 下标修改：通过 数组下标 修改数组成员的值，不会响应式
+  - 长度：修改数组长度时，不会响应式
+- 解决
+  - Vue.set()
+  - 利用 vue 重写的 7 中方法
+```
+
+### (6) keep-alive 的原理
+
 # 相关链接
 
 - https:github.com/woow-wu7/7-vue2-source-code-analysis/blob/main/src/core/observer/watcher.js
