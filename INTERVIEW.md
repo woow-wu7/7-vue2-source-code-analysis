@@ -92,6 +92,7 @@ computedWatcher
   - 最终都会把不同类型的 handler 转换成函数，然后执行 vm.$watch(expOrFn, handler, options)
   - 官网说明：https:cn.vuejs.org/v2/api/#watch
 - watch 对象的 value 是对象时，支持的属性
+  - handler: watch 的回调函数，参数是 newValue, oldValue
   - deep：表示深度监听
   - immediate：表示立即执行 callback，不用等到 key 变化时才去执行
   - sync：表示 ( 同步 watch 对象中的 handler 先执行 )，( 普通的 watch 对象的 handler 后执行 )
@@ -138,10 +139,29 @@ Object.defineProperty 的缺点
   - 长度：修改数组长度时，不会响应式
 - 解决
   - Vue.set()
-  - 利用 vue 重写的 7 中方法
+  - 利用 vue 重写的 7 种方法
+    - push pop shift unshift splice
+    - sort reverse
 ```
 
 ### (6) keep-alive 的原理
+
+- keep-alive 是内置的 ( 抽象组件 )
+- 抽象组件的特点：
+  - 1.自身不会渲染成 DOM 元素，即不占据 DOM 元素
+  - 2.不在父组件链中，即抽象组件的 ( 父组件 ) 和 ( 子组件 ) 直接形成父子关系
+- props
+  - include
+  - exclude
+  - max
+- 生命周期
+  - activated
+  - deactivated
+- 缓存策略
+  - LRU
+  - latest recently used 最近最少使用
+- 源码
+  - src/core/components/keep-alive.js
 
 # 相关链接
 
