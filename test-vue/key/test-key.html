@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <!-- vue - cdn -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="root">
+      <button @click="add">添加节点</button>
+      <div v-for="({label,value}, index) in inputList">
+        <span style="display: inline-block; width: 20px">{{label}}</span>
+        <input type="text" />
+        <button @click="del(index)">删除节点</button>
+      </div>
+    </div>
+    <script>
+      // key 是 index 的缺点
+
+      // 1
+      // 描述
+      // 1. 当我们添加input后，在每个input输入不同的值，123
+      // 2. 当我们删除2的时，低三个input中的值从 ( 3变成了2 )
+
+      // 2
+      // 原因：因为 index=2，删除第二个后，第三个的index变成了2，比较两个index都是2，认为还是原来的第二个input，所以值变成了2
+
+      // 3
+      // react 同理
+      // 测试案例：
+      // import { useState } from "react";
+      // export default function App() {
+      //   const list = [{ id: 0 }, { id: 1 }, { id: 2 }];
+      //   const [arr, setArr] = useState(list);
+      //   const del = () => {
+      //     const _arr = [...arr];
+      //     _arr.shift();
+      //     setArr(_arr);
+      //   };
+      //   const renderIndex = () => arr.map((_, index) => <input key={index} />);
+      //   const renderId = () => arr.map(({ id }) => <input key={id} />);
+      //   return (
+      //     <div className="App">
+      //       错误：{renderIndex()}
+      //       <br />
+      //       正确：{renderId()}
+      //       <br />
+      //       <button onClick={del}>删除第一个元素</button>
+      //     </div>
+      //   );
+      // }
+
+      new Vue({
+        el: "#root",
+        data() {
+          return {
+            inputList: [],
+          };
+        },
+        methods: {
+          add() {
+            const len = this.inputList.length;
+            this.inputList.push({
+              label: len + 1,
+            });
+          },
+          del(index) {
+            this.inputList.splice(index, 1);
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
