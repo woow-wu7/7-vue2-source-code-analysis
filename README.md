@@ -64,6 +64,10 @@ camel 骆驼
 - [element-ui 源码分析-仓库](https://github.com/woow-wu7/8-element-source-code-analysis)
 
 
+## 虚拟DOM
+- [手写diff算法-snabbdom](https://github.com/woow-wu7/7-vue2-source-code-snabbdom)
+
+
 ## (一) 如何调试Vue2.0源码
 ### (1) 利用vue源码库代码进行调试
 - 第一步

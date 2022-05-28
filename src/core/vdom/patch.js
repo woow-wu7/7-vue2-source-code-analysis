@@ -498,6 +498,8 @@ export function createPatchFunction (backend) {
     }
   }
 
+  // ------------------------
+  // patchVnode
   function patchVnode (
     oldVnode,
     vnode,
