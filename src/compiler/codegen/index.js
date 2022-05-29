@@ -64,9 +64,9 @@ export function genElement (el: ASTElement, state: CodegenState): string {
     return genStatic(el, state)
   } else if (el.once && !el.onceProcessed) {
     return genOnce(el, state)
-  } else if (el.for && !el.forProcessed) { // 可以看到 v-for 先于 v-if 进行判断，所有优先级 v-for 比 v-if 高
+  } else if (el.for && !el.forProcessed) { // v-for 可以看到 v-for 先于 v-if 进行判断，所有优先级 v-for 比 v-if 高
     return genFor(el, state)
-  } else if (el.if && !el.ifProcessed) {
+  } else if (el.if && !el.ifProcessed) { // v-if
     return genIf(el, state)
   } else if (el.tag === 'template' && !el.slotTarget && !state.pre) {
     return genChildren(el, state) || 'void 0'

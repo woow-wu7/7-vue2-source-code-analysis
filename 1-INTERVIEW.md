@@ -243,16 +243,46 @@ loading[data-v-ffa58c1c] {
 ```
 
 ### (10) v-if 和 v-for 的优先级
-- 一起使用
-  - 当 v-if和v-for一起使用时，优先级 ( v-for > v-if )
-- 避免：在同一元素上同时使用v-for和v-if
+- 优先级：当 v-if和v-for一起使用时，优先级 ( v-for > v-if )
+- 原因
+  - 因为：在源码中，在进行if判断的时候，v-for是比v-if先进行判断的
+  - 文件位置：src/compiler/codegen/index.js
+  - v-for 在编译时会被编译成 ( _l 函数 )，即 renderList 方法
+  - v-if 在编译时会被编译成 ( 三元表达式 )
+- 具体被编译结果如下
+```
+1. template
+<div>
+	<div v-for="value in [1,2]" v-if="true"></div>
+</div>
+
+
+2. 编译结果
+- 先v-for生成每个节点，在通过v-if进行判断
+function render() {
+  with(this) {
+    return _c('div', _l(([1, 2]), function (value) {
+      return (true) ? _c('div') : _e()
+    }), 0)
+  }
+}
+
+3. 编译网站
+https://v2.template-explorer.vuejs.org/
+
+4. 扩展
+v-if 和 v-show 的区别
+v-if ---> 编译阶段，控制是否渲染
+v-show -> 运行时阶段，控制样式，相当于该元素 ( 默认的display ) 和 ( display:none ) 之间切换
+```
+- 避免：避免在同一元素上同时使用v-for和v-if
 - 解决：
   - 1. 如果是对列表进行过滤，可以使用 ( 计算属性 ) 将要渲染的节点过滤后，在交给 ( v-for ) 去渲染
   - 2. 如果是安条件渲染，可以将 ( v-if 提高到容器元素上 )，在容器元素内部再使用 ( v-for )
   - 官网：https://cn.vuejs.org/v2/style-guide/#%E9%81%BF%E5%85%8D-v-if-%E5%92%8C-v-for-%E7%94%A8%E5%9C%A8%E4%B8%80%E8%B5%B7%E5%BF%85%E8%A6%81
-- 源码：
-  - 因为在源码中，在进行if判断的时候，v-for是比v-if先进行判断的
+- 资料
   - https://juejin.cn/post/6844904183619944462
+  - https://juejin.cn/post/6941995130144587789
 - v-for
   - 可以遍历 ( 数组，对象，字符串，数字, Iterate接口的数据 )
   - Array | Object | number | string | Iterable (2.6 新增)
