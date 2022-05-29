@@ -101,11 +101,13 @@ computedWatcher
 
 ```
 nextTick
+- this.$nextTick()
+- Vue.nextTick()
 ---
 
 1. 作用
   - 在下次DOM更新循环结束后，执行延时回调
-  - 在修改数据后，立即使用 nextTick 获取 ( 更新后的DOM )
+  - 在 ( 修改数据 ) 后，立即使用 nextTick 获取 ( 更新后的DOM )
 2. 原理
   - 利用从 微任务 到 宏任务 的逐渐降级
   - promise -> mutationObserver -> setImmediate -> setTimeout
@@ -119,6 +121,13 @@ nextTick
       - setInterval
       - setImmediate
       - requestAnimationFrame
+3. 使用
+  - 1. 传入参数回调，在参数回调中获取最新的DOM ------------ 参数回调
+  - 2. 返回一个promise，可以通过then的方式获取最新的DOM --- promise
+  - Vue.nextTick(function () { // DOM 更新了 })
+  - Vue.nextTick().then(function () { // DOM 更新了 })
+4. 案列
+  - https://github.com/woow-wu7/vue2-research/blob/master/src/views/Loading.vue
 ```
 
 ### (6) Object.defineProperty 的缺点
