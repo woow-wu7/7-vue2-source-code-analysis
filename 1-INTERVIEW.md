@@ -201,6 +201,38 @@ Object.defineProperty 的缺点
 - vue：本项目/test-vue/key/test-key.html
 - react：https://juejin.cn/post/7029703494877577246
 
+### (9) vue style标签中的 scoped 的作用
+- scoped
+  - 是 html5 新增加的属性
+  - 是一个 boolean 值，表示 ( 则样式仅仅应用到 style 元素的 - 父元素及其子元素 )
+- vue 中的 scoped
+  - 作用：样式只作用于该组件，和其他组件即使是同一个class类名，也互不影响
+  - 原理：
+    - 1. 在 html 的css选择器对应的标签节点中，添加自定义属性 ( data-v-hash值 )
+    - 2. 在 css选择器 - 添加 ( 属性选择器 ) - ( a[data-v-hash值] )
+- 案例
+```
+<template>
+  <div class="loading">
+</template>
+<style scoped>
+  .loading {
+    border: 2px solid blue;
+  }
+</style>
+
+
+1. html处理为
+- 添加自定义属性 data-v-hash值
+<div data-v-ffa58c1c class="loading">
+
+2. css处理为
+- 属性选择器 loading[data-v-hash值]
+loading[data-v-ffa58c1c] {
+  border: 2px solid blue;
+}
+```
+
 # 相关链接
 
 - https:github.com/woow-wu7/7-vue2-source-code-analysis/blob/main/src/core/observer/watcher.js
