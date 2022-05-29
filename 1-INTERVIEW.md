@@ -242,6 +242,24 @@ loading[data-v-ffa58c1c] {
 }
 ```
 
+### (10) v-if 和 v-for 的优先级
+- 一起使用
+  - 当 v-if和v-for一起使用时，优先级 ( v-for > v-if )
+- 避免：在同一元素上同时使用v-for和v-if
+- 解决：
+  - 1. 如果是对列表进行过滤，可以使用 ( 计算属性 ) 将要渲染的节点过滤后，在交给 ( v-for ) 去渲染
+  - 2. 如果是安条件渲染，可以将 ( v-if 提高到容器元素上 )，在容器元素内部再使用 ( v-for )
+  - 官网：https://cn.vuejs.org/v2/style-guide/#%E9%81%BF%E5%85%8D-v-if-%E5%92%8C-v-for-%E7%94%A8%E5%9C%A8%E4%B8%80%E8%B5%B7%E5%BF%85%E8%A6%81
+- 源码：
+  - 因为在源码中，在进行if判断的时候，v-for是比v-if先进行判断的
+  - https://juejin.cn/post/6844904183619944462
+- v-for
+  - 可以遍历 ( 数组，对象，字符串，数字, Iterate接口的数据 )
+  - Array | Object | number | string | Iterable (2.6 新增)
+  - v-for源码位置：本项目/src/core/instance/render-helpers/render-list.js
+- 案例
+  - 本项目/test-vue/v-if+v-show/vIf-vShow.html
+
 # 相关链接
 
 - https:github.com/woow-wu7/7-vue2-source-code-analysis/blob/main/src/core/observer/watcher.js

@@ -19,7 +19,9 @@ export function installRenderHelpers (target: any) {
   target._o = markOnce
   target._n = toNumber
   target._s = toString
-  target._l = renderList
+
+  target._l = renderList // renderList
+
   target._t = renderSlot
   target._q = looseEqual
   target._i = looseIndexOf
@@ -31,7 +33,15 @@ export function installRenderHelpers (target: any) {
   target._k = checkKeyCodes
   target._b = bindObjectProps
   target._v = createTextVNode
-  target._e = createEmptyVNode
+
+  target._e = createEmptyVNode // 创建空节点
+  // export const createEmptyVNode = (text: string = '') => {
+  //   const node = new VNode()
+  //   node.text = text
+  //   node.isComment = true // 是一个没有文本的注释节点
+  //   return node
+  // }
+
   target._u = resolveScopedSlots
   target._g = bindObjectListeners
   target._d = bindDynamicKeys

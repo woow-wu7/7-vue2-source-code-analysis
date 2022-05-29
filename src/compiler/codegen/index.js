@@ -40,6 +40,7 @@ export type CodegenResult = {
   staticRenderFns: Array<string>
 };
 
+// generate
 export function generate (
   ast: ASTElement | void,
   options: CompilerOptions
@@ -53,6 +54,7 @@ export function generate (
   }
 }
 
+// genElement
 export function genElement (el: ASTElement, state: CodegenState): string {
   if (el.parent) {
     el.pre = el.pre || el.parent.pre
@@ -62,7 +64,7 @@ export function genElement (el: ASTElement, state: CodegenState): string {
     return genStatic(el, state)
   } else if (el.once && !el.onceProcessed) {
     return genOnce(el, state)
-  } else if (el.for && !el.forProcessed) {
+  } else if (el.for && !el.forProcessed) { // 可以看到 v-for 先于 v-if 进行判断，所有优先级 v-for 比 v-if 高
     return genFor(el, state)
   } else if (el.if && !el.ifProcessed) {
     return genIf(el, state)

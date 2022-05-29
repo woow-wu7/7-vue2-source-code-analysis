@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <!-- vue - cdn -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="root">
+      <!-- 数组 -->
+      <section
+        style="border: 1px solid black; padding: 20px; background: yellow"
+      >
+        <p>测试 v-for 和 v-if 的优先级</p>
+        <ul>
+          <li v-for="(obj, index) in filterShow" :key="index">
+            {{ obj.text }}
+          </li>
+        </ul>
+      </section>
+
+      <!-- 对象 -->
+      <!-- v-for遍历对象时，第一个值是value，第二个值是key，第三个值是index -->
+      <ul>
+        <li v-for="(value, key, index) in map">
+          <span>value => {{value}}</span>
+          <span>key => {{key}}</span>
+          <span>index => {{index}}</span>
+        </li>
+      </ul>
+    </div>
+    <script>
+      // (10) v-if 和 v-for 的优先级
+      // - 一起使用
+      //   - 当 v-if和v-for一起使用时，优先级 ( v-for > v-if )
+      // - 避免：在同一元素上同时使用v-for和v-if
+      // - 解决：
+      //   - 1. 如果是对列表进行过滤，可以使用 ( 计算属性 ) 将要渲染的节点过滤后，在交给 ( v-for ) 去渲染
+      //   - 2. 如果是安条件渲染，可以将 ( v-if 提高到容器元素上 )，在容器元素内部再使用 ( v-for )
+      //   - 官网：https://cn.vuejs.org/v2/style-guide/#%E9%81%BF%E5%85%8D-v-if-%E5%92%8C-v-for-%E7%94%A8%E5%9C%A8%E4%B8%80%E8%B5%B7%E5%BF%85%E8%A6%81
+      // - 案例
+      //   - 本项目/test-vue/v-if+v-show/vIf-vShow.html
+      new Vue({
+        el: "#root",
+        data() {
+          return {
+            list: [
+              {
+                isShow: true,
+                text: 1,
+              },
+              {
+                isShow: false,
+                text: 2,
+              },
+              {
+                isShow: true,
+                text: 3,
+              },
+            ],
+            map: {
+              key1: 1,
+              key2: 2,
+              key3: 3,
+            },
+          };
+        },
+        computed: {
+          filterShow() {
+            return this.list.filter((value) => value.isShow);
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
