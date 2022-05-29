@@ -50,8 +50,8 @@
 
 ### (3) computed
 
-- 特点
-  - 1. 只有在 computed 被访问时才会去计算
+- 特点 ( 4个特点 )
+  - 1. 只有在 computed 被访问时才会去计算，( 比如在template模版中被访问，methods中被访问 )
   - 2. computed 具有缓存功能，也就是说如果之前某个 computed 的 key 被访问过了，再次访问不会进行重新计算，而是直接返回之前计算好的值
   - 3. computed 的依赖必须是响应式数据，不然依赖变化后也不会触发 computed 重新计算
   - 4. 即使 computed 的依赖变化了，但是 computed 计算的值并没有变化时，也不会重新渲染
@@ -86,7 +86,7 @@ computedWatcher
 
 - watch 对象的 key 对应的 value 的类型
   - function --- 表示 key 变化时执行的函数
-  - string ----- 表示 方法名 或 data.a 对象.b 属性
+  - string ----- 表示 ( 方法名 ) 或 ('a.b') -> data.a 对象 .b 属性
   - object ----- 对象中一定要有 handler 方法，{ handler, immediate, deep, sync }
   - array ------ 以上的组合
   - 最终都会把不同类型的 handler 转换成函数，然后执行 vm.$watch(expOrFn, handler, options)
@@ -113,7 +113,7 @@ nextTick
     - 微任务
       - promise
       - process.nextTick
-      - mutationObserver
+      - mutationObserver - 观察DOM节点的变化
     - 宏任务
       - setTimeout
       - setInterval
@@ -128,7 +128,7 @@ Object.defineProperty 的缺点
 ---
 
 对象
-- 问题：添加和删除属性，不会响应式
+- 问题：添加和删除属性，不会响应式，只会在修改属性时才会响应式
 - 解决：
   - Vue.set()
   - vm.$set()
@@ -139,17 +139,17 @@ Object.defineProperty 的缺点
   - 长度：修改数组长度时，不会响应式
 - 解决
   - Vue.set()
-  - 利用 vue 重写的 7 种方法
-    - push pop shift unshift splice
+  - 利用 vue 重写的 7 种数组方法
+    - push pop unshift shift splice
     - sort reverse
 ```
 
 ### (6) keep-alive 的原理
 
 - keep-alive 是内置的 ( 抽象组件 )
-- 抽象组件的特点：
-  - 1.自身不会渲染成 DOM 元素，即不占据 DOM 元素
-  - 2.不在父组件链中，即抽象组件的 ( 父组件 ) 和 ( 子组件 ) 直接形成父子关系
+- 抽象组件的特点：( 2个特点 )
+  - 1. 自身不会渲染成 DOM 元素，即不占据 DOM 元素
+  - 2. 不在父组件链中，即抽象组件的 ( 父组件 ) 和 ( 子组件 ) 直接形成父子关系
 - props
   - include
   - exclude
@@ -162,6 +162,44 @@ Object.defineProperty 的缺点
   - latest recently used 最近最少使用
 - 源码
   - src/core/components/keep-alive.js
+
+### (7) diff算法
+- 分类：treeDiff componentDiff elementDiff
+- 总体：逐层比较
+  - 1. 节点是组件，走 componentDiff
+        - 判断组件类型是否一样，根据组件名称和组件类型判断
+          - 类型一样，按原策略逐层比较
+          - 类型不一样，脏组件，暴力删除
+  - 2. 节点是元素节点，走 elementDiff
+        - 添加，删除，移动
+  - 3. 具体比较细节
+        - 判断 newVnode 和 oldVnode 是否是同一个 ( 虚拟节点 )
+          - 不是同一个虚拟节点 ---> 暴力插入新节点，删除旧节点
+          - 是同一个虚拟节点
+          - (1) 判断 newVnode 和 oldVnode 是否是同一个内存中的对象
+              - 是 ---> 不做任何操作
+              - 不是 -> 继续往下执行(2)
+          - (2) newVnode 和 oldVnode 都只有 text属性
+              - text相同 ---> 不做任何操作
+              - text不相同 -> 直接修改DOM为newVnode的text
+          - (3) newVnode只有children，oldVnode只有text
+              - 1. 将 newVnode 的  children 插入到 oldVnode 对应的真实DOM的 前面
+              - 2. 同时 删除 oldVnode 对应的 DOM 中的 text
+          - (4) newVnode 和 oldVnode 都有 children
+              - 四个指针 + 递归
+              - 1. 新前与旧前比较 -----> 命中指针后移，按上面的策略进行patch，没命中往下走，执行(2)
+              - 2. 新后与旧后比较 -----> 命中指针前移，按上面的策略进行patch，没命中往下走，执行(3)
+              - 3. 新后与旧前比较 -----> 命中-旧前指针后移动，新后指针前移，需要移动节点，把 ( 新前 ) 移动到 ( 旧后之后 )；没命中往下走，执行(4)
+              - 4. 新前与旧后比较 -----> 命中-新前指针后移，旧后指针前移，需要移动节点，把 ( 新前 ) 移动到 ( 旧前之前 )
+              - 指针：前往后移，后往前移
+
+### (8) 用 index 作为 key 的缺点
+- key的作用：用于 diff 算法中的唯一标记
+- index作用为key的缺点：
+  - 描述：比如当渲染list为3个input框，在每个input框中输入123，删除2，3的input框会变成2
+  - 原因：因为删除2后，原来3的index变成了2，(key) 和 (css选择器input) 都没变，认为还是之前的2
+- vue：本项目/test-vue/key/test-key.html
+- react：https://juejin.cn/post/7029703494877577246
 
 # 相关链接
 
