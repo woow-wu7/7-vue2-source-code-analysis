@@ -6,7 +6,7 @@
   - beforeCreate
   - created ----------- 实例创建完成，但是并没有挂载，可以获取 computed，watch，methods等，但是不能获取 $el，$refs
   - beforeMount
-  - mounted ----------- 实例被挂在后调用，( 不保证所有子组件也被挂在完成，需要在试图全部更新后执行操作，使用 vm.$nextTick，详细测试见 test-vue/life-cycle/life-cycle.html )
+  - mounted ----------- 实例被挂在后调用，( 不保证所有子组件也被挂在完成，需要在视图全部更新后执行操作，使用 vm.$nextTick，详细测试见 test-vue/life-cycle/life-cycle.html )
 - update 阶段
   - beforeUpdate
   - updated
