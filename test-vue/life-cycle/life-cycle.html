@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <!-- vue - cdn -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="root">
+      <div ref="countRef">1</div>
+      <div v-for="fruit in fruitArr" :key="fruit" :ref="fruit">{{fruit}}</div>
+    </div>
+    <script>
+      const vm = new Vue({
+        el: "#root",
+        data() {
+          return {
+            fruitArr: [],
+          };
+        },
+        methods: {
+          add() {
+            this.count = this.count + 1;
+          },
+        },
+        created() {
+          console.log("created-----开始");
+          console.log("this.add", this.add);
+          console.log("this.$el", this.$el); // created()中无法获取 $el
+          console.log("this.$refs.countRef", this.$refs.countRef); // created() 中无法获取 ref
+          console.log("created-----结束");
+        },
+        mounted() {
+          console.log("mounted-----开始");
+          console.log("this.$el", this.$el); // mounted() 可以获取 $el
+          console.log("this.$refs.countRef", this.$refs.countRef); // mounted() 可以获取 ref
+
+          // 更新数据
+          setTimeout(() => {
+            this.fruitArr = ["apple", "banana"];
+
+            // 获取不到 ref
+            this.fruitArr.forEach((item) => {
+              const ref = this.$refs[item]?.[0];
+              console.log("ref", ref);
+            });
+
+            // 能获取 ref
+            this.$nextTick(() => {
+              this.fruitArr.forEach((item) => {
+                const ref = this.$refs[item][0];
+                console.log("ref", ref);
+              });
+            });
+          }, 1000);
+
+          console.log("mounted-----结束");
+        },
+      });
+    </script>
+  </body>
+</html>
