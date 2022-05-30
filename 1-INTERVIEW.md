@@ -244,6 +244,7 @@ loading[data-v-ffa58c1c] {
 ```
 
 ### (10) v-if 和 v-for 的优先级
+- ( v-if,v-for ) 指令的处理发生在 ( 模版编译阶段 )
 - 优先级：当 v-if和v-for一起使用时，优先级 ( v-for > v-if )
 - 原因
   - 因为
@@ -251,7 +252,7 @@ loading[data-v-ffa58c1c] {
     - 文件位置：src/compiler/codegen/index.js
   - ( 模版template ) 最终会被编译为 ( render函数 )
     - v-for 在编译时会被编译成 ( _l 函数 )，即 renderList 方法
-    - v-if 在编译时会被编译成 ( 三元表达式 )
+    - v-if 在编译时会被编译成 ( 三元表达式 )；不命中的情况会创建一个空的vnode即 ( 没有文本的注释节点 )
 - 具体被编译结果如下
 ```
 1. template
