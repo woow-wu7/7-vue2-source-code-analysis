@@ -11,9 +11,9 @@
   - beforeUpdate
   - updated
 - umMount 阶段
-  - beforeUnmount
-  - unMount
-  - 或者改版之前：beforeDestroy destroyed
+  - beforeUnmount 3.0
+  - unmounted 3.0
+  - 或者改版之前的2.0：beforeDestroy destroyed
 - keep-alive 相关
   - activated ------- keepAlive 缓存的组件激活时触发
   - deactivated ----- keepAlive 缓存的组件失活时触发
@@ -42,10 +42,10 @@
 
 
 3. unmount阶段
-父组件-beforeUnmount
-子组件-beforeUnmount
-子组件-unmounted
-父组件-unmounted
+父组件-beforeUnmount/beforeDestroy
+子组件-beforeUnmount/beforeDestroy
+子组件-unmounted/destroyed
+父组件-unmounted/destroyed
 ```
 
 ### (3) computed
