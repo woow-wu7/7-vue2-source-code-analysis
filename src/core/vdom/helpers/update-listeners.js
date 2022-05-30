@@ -11,6 +11,7 @@ import {
   isPlainObject
 } from 'shared/util'
 
+// normalizeEvent
 const normalizeEvent = cached((name: string): {
   name: string,
   once: boolean,
@@ -19,6 +20,9 @@ const normalizeEvent = cached((name: string): {
   handler?: Function,
   params?: Array<any>
 } => {
+  // passive -> &
+  // once ----> ~
+  // capture -> !
   const passive = name.charAt(0) === '&'
   name = passive ? name.slice(1) : name
   const once = name.charAt(0) === '~' // Prefixed last, checked first
@@ -26,7 +30,7 @@ const normalizeEvent = cached((name: string): {
   const capture = name.charAt(0) === '!'
   name = capture ? name.slice(1) : name
   return {
-    name,
+    name, // 事件名
     once,
     capture,
     passive

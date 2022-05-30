@@ -104,9 +104,14 @@ function remove (
 }
 
 function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
+
+  // 获取 vnode 中的 事件属性
+
+  // 不存在 on 属性
   if (isUndef(oldVnode.data.on) && isUndef(vnode.data.on)) {
     return
   }
+
   const on = vnode.data.on || {}
   const oldOn = oldVnode.data.on || {}
   // vnode is empty when removing all listeners,

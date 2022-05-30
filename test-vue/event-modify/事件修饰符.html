@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <!-- vue - cdn -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="root">
+      <!-- self事件修饰符：只有 ( 事件绑定的节点 ) 和 ( 触发事件的节点 ) 是 ( 同一个节点 ) 时才会触发 -->
+      <div @click.self.once.right="add">
+        添加节点
+        <div>子节点1</div>
+        <div>子节点2</div>
+        <div>子节点3</div>
+      </div>
+      <div>count: {{count}}</div>
+    </div>
+    <script>
+      new Vue({
+        el: "#root",
+        data() {
+          return {
+            count: 1,
+          };
+        },
+        methods: {
+          add() {
+            this.count = this.count + 1;
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

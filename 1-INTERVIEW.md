@@ -311,7 +311,7 @@ v-show -> 运行时阶段，控制样式，相当于该元素 ( 默认的display
   - 如何优化
     - 整个过程：template(HTML) -> AST -> render -> Vnode -> patch ( diff对比+生成真实DOM )
     - 具体优化：
-      - 因为 ( 静态节点和静态根节 )点不会变化，所以是 ( 不需要做diff算法比对 ) 的，所以不做diff，提升性能
+      - 因为 ( 静态节点和静态根节 ) 点不会变化，所以是 ( 不需要做diff算法比对 ) 的，所以不做diff，提升性能
       - 具体就是两点
         - 1. 在AST中找出所有静态节点并打上标记；
         - 2. 在AST中找出所有静态根节点并打上标记；
@@ -325,6 +325,55 @@ v-show -> 运行时阶段，控制样式，相当于该元素 ( 默认的display
     - 递归
     - 从顶向下依次递归AST中的每一个节点，根据 ( 不同的AST节点类型 ) 创建 ( 不同的VNode类型 )
 
+
+### (12) 事件修饰符的原理
+- 常见的事件修饰符
+  - stop ---------- 阻止传播，相当于 event.stopPropagation
+  - prevent ------- 阻止默认，相当于 event.preventDefault
+  - capture ------- 在捕获阶段触发
+  - once ---------- 只触发一次
+  - passive ------- 不会阻止 event.preventDefault
+  - self ---------- ( 绑定事件的节点 ) 和 ( 事件触发的节点 ) 要是 ( 同一个节点 ) 才会触发
+  - left ---------- 鼠标左键触发
+  - right
+  - middle
+```
+1
+addEventListener
+target.addEventListener(type, listener|具有handleEvent方法的对象[, useCapture｜{capture,once,passive}]);
+
+2
+绑定事件的三种方法
+- HTML中通过 ( onClick="要执行的代码" )
+- js中通过 DOM节点.onclick=function(){}
+- js中通过 DOM节点.addEventListener('click', listener, useCapture)
+- 优缺点
+  - HTML
+    - HTML标签中使用使用 ( on+事件名="需要执行的代码" )
+    - 1. 只能在 ( 冒泡阶段 ) 触发
+    - 2. 违反了 HTML 和 JS 分离的原则
+  - 事件属性
+    - 1. 只能在 ( 冒泡阶段 ) 触发
+    - 2. 同一个事件，只能绑定 ( 一个监听函数 )，不能绑定多个
+  - addEventListener
+    - 1. 能指定事件触发的阶段，第三个参数是对象时，通过 capture 指定是否在捕获阶段触发，false则在冒泡阶段触发
+    - 2. 同一个事件可以绑定多个监听函数
+  - 总结
+    - 推荐使用 addEventListener
+
+3
+事件修饰符的原理
+- 主要依靠：( 模版编译 ) 原理，即在模版编译时做相关处理
+- 1. prevent stop 在 ( 模版编译 ) 时，会直接在 ( 事件监听函数 ) 中添加 event.preventDefault 和 event.stopPropagation
+- 2. capture，once，passive 在 ( 模版编译 ) 时，会在 ( 事件名前 ) 增加 ( 标识~!& )
+  - capture ------> !
+  - once ---------> ~
+  - passive ------> &
+  - 具体
+    - html -------> <div @click.stop.prevent.once.capture></div> )
+    - render -----> function render() { with(this) { return _c('div', [_c('div', { on: { "~!click": function ($event) {} } })]) } }
+- 3. 键盘事件同理
+```
 # 相关链接
 
 - https:github.com/woow-wu7/7-vue2-source-code-analysis/blob/main/src/core/observer/watcher.js
