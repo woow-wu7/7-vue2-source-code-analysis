@@ -47,7 +47,10 @@ export function generate (
 ): CodegenResult {
   const state = new CodegenState(options)
   // fix #11483, Root level <script> tags should not be rendered.
+
   const code = ast ? (ast.tag === 'script' ? 'null' : genElement(ast, state)) : '_c("div")'
+  // genElement(ast, state)
+
   return {
     render: `with(this){return ${code}}`,
     staticRenderFns: state.staticRenderFns
@@ -55,6 +58,10 @@ export function generate (
 }
 
 // genElement
+// - 元素节点属性的情况有很多种，但是生成的 Vnode 只有三种
+//  - 元素节点
+//  - 文本节点
+//  - 注释节点
 export function genElement (el: ASTElement, state: CodegenState): string {
   if (el.parent) {
     el.pre = el.pre || el.parent.pre

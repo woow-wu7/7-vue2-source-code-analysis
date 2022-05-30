@@ -32,7 +32,11 @@ export function installRenderHelpers (target: any) {
 
   target._k = checkKeyCodes
   target._b = bindObjectProps
-  target._v = createTextVNode
+
+  target._v = createTextVNode // 创建文本节点
+  // export function createTextVNode (val: string | number) {
+  //   return new VNode(undefined, undefined, undefined, String(val))
+  // }
 
   target._e = createEmptyVNode // 创建空节点
   // export const createEmptyVNode = (text: string = '') => {

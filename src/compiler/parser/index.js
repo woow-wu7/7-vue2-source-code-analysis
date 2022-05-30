@@ -74,8 +74,36 @@ export function createASTElement (
 }
 
 /**
+ * parse -----------------------------------------------------------------------------
  * Convert HTML string to AST.
+ * 将 HTML 转成 AST
  */
+
+// 1
+// 整体过程
+// - parseHTML 函数对模板字符串进行解析，解析成 AST
+//  - 1. 如果遇到 ( 文本信息 )，就会调用文本解析器 ( parseText ) 函数进行文本解析
+//  - 2. 如果遇到 ( 文本中包含过滤器 )，就会调用过滤器解析器 ( parseFilters ) 函数进行解析
+
+// 2
+// 精简 parse 方法
+// export function parse(template, options) {
+//  parseHTML(template, {
+//    warn,
+//    expectHTML: options.expectHTML,
+//    isUnaryTag: options.isUnaryTag,
+//    canBeLeftOpenTag: options.canBeLeftOpenTag,
+//    shouldDecodeNewlines: options.shouldDecodeNewlines,
+//    shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
+//    shouldKeepComment: options.comments,
+//    start (tag, attrs, unary) { parseFilters },
+//    end () {},
+//    chars (text: string) { parseText },
+//    comment (text: string) {}
+//  })
+//  return root
+// }
+
 export function parse (
   template: string,
   options: CompilerOptions
@@ -205,6 +233,13 @@ export function parse (
     }
   }
 
+  // parseHTML
+  // 1
+  // - 四个钩子函数：start，end，chars，comment
+  // 2
+  // - 问题：在解析template时如何保证是 ( 树形结构 )
+  // - 回答：通过 ( 栈 ) 来维护
+  // - 案例：详见 https://vue-js.com/learn-vue/complie/HTMLParse.html#_4-%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81ast%E8%8A%82%E7%82%B9%E5%B1%82%E7%BA%A7%E5%85%B3%E7%B3%BB
   parseHTML(template, {
     warn,
     expectHTML: options.expectHTML,
@@ -214,6 +249,13 @@ export function parse (
     shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
     outputSourceRange: options.outputSourceRange,
+
+    // 开始标签
+    // 当解析到开始标签时，调用该函数
+    // - 参数
+    //  - tag 标签名
+    //  - attrs 标签属性
+    //  - unary 标签是否闭合
     start (tag, attrs, unary, start, end) {
       // check namespace.
       // inherit parent ns if there is one
@@ -225,7 +267,9 @@ export function parse (
         attrs = guardIESVGBug(attrs)
       }
 
+      // createASTElement - 创建元素类型的 AST
       let element: ASTElement = createASTElement(tag, attrs, currentParent)
+
       if (ns) {
         element.ns = ns
       }
@@ -301,6 +345,8 @@ export function parse (
       }
     },
 
+    // 结束标签
+    // 当解析到结束标签时，调用该函数
     end (tag, start, end) {
       const element = stack[stack.length - 1]
       // pop stack
@@ -312,6 +358,8 @@ export function parse (
       closeElement(element)
     },
 
+    // 文本
+    // 当解析到文本时，调用该函数
     chars (text: string, start: number, end: number) {
       if (!currentParent) {
         if (process.env.NODE_ENV !== 'production') {
@@ -383,6 +431,9 @@ export function parse (
         }
       }
     },
+
+    // 注释
+    // 当解析到注释时，调用该函数
     comment (text: string, start, end) {
       // adding anything as a sibling to the root node is forbidden
       // comments should still be allowed, but ignored
