@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <!-- vue - cdn -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="root">
+      <button @click="count++">修改count</button>
+      <child :count="count"></child>
+    </div>
+    <script>
+      const Child = Vue.component("child", {
+        props: {
+          count: Number,
+        },
+        template: `<div style="border: 1px solid red; padding: 20px;">
+          <p>count是父组件传给子组件的</p>
+          <p>{{count}}</p>
+        </div>`,
+        beforeCreate() {
+          console.log("子组件的beforeCreated -------- 后执行");
+        },
+        created() {
+          console.log("子组件的created -------- 后执行");
+        },
+        beforeMount() {
+          console.log("子组件的beforeMount-------- 后执行");
+        },
+        mounted() {
+          console.log("子组件的mounted -------- 先执行");
+          console.log(
+            "子组件的mounted钩子中，获取父组件中异步获取的数据 - this.count ++++ 获取不到",
+            this.count
+          );
+        },
+        beforeUpdate() {
+          console.log("子组件的beforeUpdate-------- 后执行");
+        },
+        updated() {
+          console.log("子组件的updated -------- 先执行");
+          console.log(
+            "子组件的updated钩子中，获取父组件中异步获取的数据 - this.count ++++ 能获取到",
+            this.count
+          );
+        },
+      });
+
+      const vm = new Vue({
+        el: "#root",
+        data() {
+          return {
+            count: 1,
+          };
+        },
+        methods: {
+          add() {
+            this.count = this.count + 1;
+          },
+        },
+        beforeCreate() {
+          console.log("父组件的beforeCreated -------- 先执行");
+        },
+        created() {
+          console.log("父组件的created -------- 先执行");
+        },
+        beforeMount() {
+          console.log("父组件的beforeMount-------- 先执行");
+        },
+        mounted() {
+          console.log("父组件的mounted -------- 后执行");
+          setTimeout(() => {
+            this.count = 20;
+          }, 1000);
+        },
+        beforeUpdate() {
+          console.log("父组件的beforeUpdate-------- 先执行");
+        },
+        updated() {
+          console.log("父组件的updated -------- 后执行");
+        },
+      });
+    </script>
+  </body>
+</html>

@@ -46,6 +46,10 @@
 子组件-beforeUnmount/beforeDestroy
 子组件-unmounted/destroyed
 父组件-unmounted/destroyed
+
+
+问题：为什么创建的时候是父组件先创建，挂载的时候是子组件先挂载
+回答：<Father><Child><Child><Father> 可以类比于 ( 函数调用栈 ) 的情况，执行完child出栈，father才会执行完毕出栈
 ```
 
 ### (3) computed
