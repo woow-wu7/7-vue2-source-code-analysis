@@ -390,11 +390,12 @@ target.addEventListener(type, listener|具有handleEvent方法的对象[, useCap
   - 包含：不在 ( props ) 中的 ( attribute )
   - 不包含：style 和 class
   - 传入组件内部：可以通过 v-bind="$attrs" 传入内部组件——在创建高级别的组件时非常有用
-  - 案例：本项目/test-vue/$attrs/$attrs.html
+  - 案例：本项目/test-vue/$attrs/$attrs-$listeners.html
 - vm.$listeners
   - 包含：了父作用域中的 v-on 事件监听器
   - 不包含：(不含 .native 修饰器的)  v-on 事件监听器
   - 传入组件内部：可以通过 v-on="$listeners" 传入内部组件——在创建更高层次的组件时非常有用
+  - 案例：本项目/test-vue/$attrs/$attrs-$listeners.html
 
 
 

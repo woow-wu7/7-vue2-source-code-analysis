@@ -11,7 +11,7 @@
   </head>
   <body>
     <div id="root">
-      <child a="a" b="b" c="c" @go="go"></child>
+      <child a="a" b="b" c="c" @go="go" @go2.native="go2" @go3="go3"></child>
     </div>
     <script>
       // 测试 $attrs $listeners
@@ -38,7 +38,8 @@
           b: String,
         },
         mounted() {
-          console.log("this.$attrs", this.$attrs);
+          console.log("this.$attrs", this.$attrs); // 不包含 style class props
+          console.log("this.$listeners", this.$listeners); // 不包含  不含 .native 修饰器的 v-on 事件监听器
           console.log("this.b", this.b);
         },
       });
@@ -54,6 +55,12 @@
         methods: {
           go() {
             console.log("go");
+          },
+          go2() {
+            console.log("go2");
+          },
+          go3() {
+            console.log("go3");
           },
         },
       });
