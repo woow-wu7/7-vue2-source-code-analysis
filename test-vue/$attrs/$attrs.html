@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <!-- vue - cdn -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="root">
+      <child a="a" b="b" c="c" @go="go"></child>
+    </div>
+    <script>
+      // 测试 $attrs $listeners
+
+      const child = Vue.component("child", {
+        template: `
+          <div>
+            <button v-bind="$attrs">button</button>
+          </div>
+        `,
+        // 1
+        // $attrs 和 props 的区别
+        // - 1. 父组件传递了 3 个属性
+        // - 2. 但是父组件中 props 只接收了 b
+        // - 所以：
+        //    - props 中只有 b
+        //    - $attrs 中有 a c
+
+        // 2
+        // 可以通过 v-bind="$attrs" 传入组件内部
+        // - 1. 本案例中 a c 两个 attribute 默认是传递给子组件的最外层根元素的
+        // - 2. 当时通过在 button 上声明 v-bind="$attrs" 就会让 button 上也就有这两个属性
+        props: {
+          b: String,
+        },
+        mounted() {
+          console.log("this.$attrs", this.$attrs);
+          console.log("this.b", this.b);
+        },
+      });
+
+      new Vue({
+        el: "#root",
+        data() {
+          return {};
+        },
+        components: {
+          child,
+        },
+        methods: {
+          go() {
+            console.log("go");
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
