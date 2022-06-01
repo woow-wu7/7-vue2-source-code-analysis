@@ -11,7 +11,15 @@
   </head>
   <body>
     <div id="root">
-      <child a="a" b="b" c="c" @go="go" @go2.native="go2" @go3="go3"></child>
+      <child
+        a="a"
+        b="b"
+        c="c"
+        :go0="go"
+        @go="go"
+        @go2.native="go2"
+        @go3="go3"
+      ></child>
     </div>
     <script>
       // 测试 $attrs $listeners
@@ -34,13 +42,22 @@
         // 可以通过 v-bind="$attrs" 传入组件内部
         // - 1. 本案例中 a c 两个 attribute 默认是传递给子组件的最外层根元素的
         // - 2. 当时通过在 button 上声明 v-bind="$attrs" 就会让 button 上也就有这两个属性
+
+        // 3
+        // 注意点：
+        //  - 如果 ( 事件 ) 是通过 v-bind 的方式传递，仍然是一个属性，走 props 和 $attrs
+        //  - 如果 ( 事件 ) 是通过 v-on 的方式传递，才会走 $listeners
         props: {
           b: String,
+          go0: Function,
         },
         mounted() {
           console.log("this.$attrs", this.$attrs); // 不包含 style class props
           console.log("this.$listeners", this.$listeners); // 不包含  不含 .native 修饰器的 v-on 事件监听器
           console.log("this.b", this.b);
+
+          console.log("this.go0", this.go0);
+          console.log("this.$listeners.go", this.$listeners.go);
         },
       });
 

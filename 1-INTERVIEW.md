@@ -396,7 +396,9 @@ target.addEventListener(type, listener|具有handleEvent方法的对象[, useCap
   - 不包含：(不含 .native 修饰器的)  v-on 事件监听器
   - 传入组件内部：可以通过 v-on="$listeners" 传入内部组件——在创建更高层次的组件时非常有用
   - 案例：本项目/test-vue/$attrs/$attrs-$listeners.html
-
+- 注意点：
+  - 如果 ( 事件 ) 是通过 ( v-bind ) 的方式传递，仍然是一个 ( 属性 )，走 props 和 $attrs
+  - 如果 ( 事件 ) 是通过 ( v-on ) 的方式传递，才会走 $listeners
 
 
 # 相关链接
