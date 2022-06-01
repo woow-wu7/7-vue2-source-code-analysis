@@ -399,7 +399,12 @@ target.addEventListener(type, listener|具有handleEvent方法的对象[, useCap
 - 注意点：
   - 如果 ( 事件 ) 是通过 ( v-bind ) 的方式传递，仍然是一个 ( 属性 )，走 props 和 $attrs
   - 如果 ( 事件 ) 是通过 ( v-on ) 的方式传递，才会走 $listeners
-
+- 扩展
+  - 问题：传递数据的方式
+  - 回答：
+    - props $attrs $listeners
+    - provide/inject context
+    - vuex router vm.$emit
 
 # 相关链接
 
