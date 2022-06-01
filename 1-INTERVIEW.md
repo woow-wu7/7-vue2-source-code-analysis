@@ -52,6 +52,7 @@
 回答：<Father><Child><Child><Father> 可以类比于 ( 函数调用栈 ) 的情况，执行完child出栈，father才会执行完毕出栈
 ```
 
+
 ### (3) computed
 
 - 特点 ( 4个特点 )
@@ -410,6 +411,9 @@ target.addEventListener(type, listener|具有handleEvent方法的对象[, useCap
 - 因为vue可以把不同的方法挂载原型链上，把实现代码单独抽离成文件，方便管理
 - 而class的话，所有非静态属性(原型属性)都必须在class内部声明，不利于大型工程文件管理
 
+
+### (15) 手写 v-model 双向数据绑定
+- 详见：本项目/test-vue/v-model/handwrite-v-model.html
 
 # 相关链接
 

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="root">
+      <input type="text" v-model="message" />
+      <div v-text="message"></div>
+    </div>
+    <script>
+      class Watcher {
+        constructor(directiveName, el, vm, exp, attr) {
+          this.name = directiveName; // 指令的名字，比如 'v-text'，'v-model'
+          this.el = el; // 每个具体的DOM节点
+          this.vm = vm; // MyVue实例对象
+          this.exp = exp; // el中的directiveName属性对应的属性值
+          this.attr = attr; // el的属性，需要需改的属性
+
+          this.update(); // 注意这里在实例化Watcher时，会执行_update()方法
+        }
+        update() {
+          this.el[this.attr] = this.vm.$data[this.exp];
+          // 将MyVue实例的data属性的最新值更新到ui视图中
+        }
+      }
+
+      class MyVue {
+        constructor(options) {
+          const { el, data } = options;
+          this.$el = document.querySelector(el);
+          this.$data = typeof data === "function" ? data() : data;
+          this.directives = [];
+
+          // 这里先执行 observe
+          // 1. 是因为 observe时给data中的每个key，在 directives 数组中都添加一个空数组
+          // 2. compile 时会想 directives 中(某个data-key)对应的数组中 push watcher
+          this.observe(this.$data);
+          this.compile(this.$el);
+        }
+
+        observe = (data) => {
+          for (let [key, value] of Object.entries(data)) {
+            if (typeof value === "object") {
+              observe(value);
+            }
+
+            if (data.hasOwnProperty(key)) {
+              this.directives[key] = [];
+            }
+
+            const that = this;
+            Object.defineProperty(this.$data, key, {
+              enumerable: true,
+              configurable: true,
+              get() {
+                return value;
+              },
+              // 3
+              // 改变data后，触发从新渲染
+              set(newValue) {
+                if (newValue !== value) {
+                  value = newValue;
+                  that.directives[key].forEach((watcher) => watcher.update());
+                }
+              },
+            });
+          }
+        };
+
+        compile = (el) => {
+          for (let [key, value] of Object.entries(el.children)) {
+            if (value.length) {
+              compile(value);
+            }
+
+            if (
+              value.hasAttribute("v-model") &&
+              (value.tagName === "INPUT" || value.tagName === "TEXTAREA")
+            ) {
+              const vModelValue = value.getAttribute("v-model");
+
+              // 1
+              // 向指令集合中的 ( v-model ) 对应的 ( 指令数组 ) 中添加 watcher
+              this.directives[vModelValue].push(
+                new Watcher("v-model", value, this, vModelValue, "value")
+              );
+
+              // 2
+              // 设置data中的属性值为-最新的input的值
+              // 1. 给 v-model 所在的元素添加 input 事件，当 input 值变化时，修改data，从而触发响应式 set
+              // 2. 即 input -> newValue -> 修改Data -> 触发响应式set -> 更新视图 ( 最新的data值的视图 )
+              value.addEventListener("input", (e) => {
+                this.$data[vModelValue] = e.target.value;
+              });
+            }
+
+            if (value.hasAttribute("v-text")) {
+              const vTextValue = value.getAttribute("v-text");
+              this.directives[vTextValue].push(
+                new Watcher("input", value, this, vTextValue, "innerHTML")
+              );
+            }
+          }
+        };
+      }
+
+      new MyVue({
+        el: "#root",
+        data() {
+          return {
+            message: 1,
+          };
+        },
+      });
+    </script>
+  </body>
+</html>
