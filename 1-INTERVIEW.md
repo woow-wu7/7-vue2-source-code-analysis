@@ -186,10 +186,10 @@ Object.defineProperty 的缺点
   - 2. 节点是元素节点，走 elementDiff
         - 添加，删除，移动
   - 3. 具体比较细节
-        - 判断 newVnode 和 oldVnode 是否是同一个 ( 虚拟节点 )
+        - 判断 newVnode 和 oldVnode 是否是 ( 同一个虚拟节点 )，即( key和css选择器都要相同 )
           - 不是同一个虚拟节点 ---> 暴力插入新节点，删除旧节点
           - 是同一个虚拟节点
-          - (1) 判断 newVnode 和 oldVnode 是否是同一个内存中的对象
+          - (1) 判断 newVnode 和 oldVnode 是否是同一个 ( 内存中的对象 )
               - 是 ---> 不做任何操作
               - 不是 -> 继续往下执行(2)
           - (2) newVnode 和 oldVnode 都只有 text属性
@@ -214,7 +214,7 @@ Object.defineProperty 的缺点
 - vue：本项目/test-vue/key/test-key.html
 - react：https://juejin.cn/post/7029703494877577246
 
-### (9) vue style标签中的 scoped 的作用
+### (9) vue style 标签中的 scoped 的作用
 - scoped
   - 是 html5 新增加的属性
   - 是一个 boolean 值，表示 ( 则样式仅仅应用到 style 元素的 - 父元素及其子元素 )
@@ -320,6 +320,11 @@ v-show -> 运行时阶段，控制样式，相当于该元素 ( 默认的display
       - 具体就是两点
         - 1. 在AST中找出所有静态节点并打上标记；
         - 2. 在AST中找出所有静态根节点并打上标记；
+  - 扩展
+    - 问题：react中有shouldComponentUpdate，为什么vue中不需要
+    - 回答：
+      - 因为vue是基于模版，即在模版编译阶段就知道哪些节点不需要做diff算法比对，因为只有静态节点和静态根节点可以判断处理
+      - 即模版编译节点的 optimize 阶段要做的事情
 - 3. generate
   - 代码生成阶段
   - 主要做的事情：生成 render 函数，供组件在挂载时调用
