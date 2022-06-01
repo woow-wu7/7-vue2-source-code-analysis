@@ -403,8 +403,13 @@ target.addEventListener(type, listener|具有handleEvent方法的对象[, useCap
   - 问题：vue 传递数据的方式
   - 回答：
     - props $attrs $listeners
-    - provide/inject context
+    - provide/inject(不是响应式的) context
     - vuex router vm.$emit
+
+### (14) 为什么大Vue不使用class而是使用构造函数呢？
+- 因为vue可以把不同的方法挂载原型链上，把实现代码单独抽离成文件，方便管理
+- 而class的话，所有非静态属性(原型属性)都必须在class内部声明，不利于大型工程文件管理
+
 
 # 相关链接
 

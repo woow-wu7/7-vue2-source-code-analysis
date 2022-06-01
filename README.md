@@ -693,6 +693,8 @@ var MyComponent = Vue.component('my-component') // ------- 获取组件，获取
   - 请注意插槽不是响应性的
 - `vm.$scopeSlots`
   - 用来访问作用域插槽
+### (14.4) 详见
+- 详见 本项目/1-INTERVIEW.md/ (13)
 
 
 ## (十五) Vue.use()
