@@ -415,6 +415,13 @@ target.addEventListener(type, listener|具有handleEvent方法的对象[, useCap
 ### (15) 手写 v-model 双向数据绑定
 - 详见：本项目/test-vue/v-model/handwrite-v-model.html
 
+### (16) 环境变量
+- 详见1
+  - (5) 环境变量
+  - https://github.com/woow-wu7/8-divine
+- 案例
+  - https://github.com/woow-wu7/4-joyo-lingjing-h5/blob/main/.env
+
 # 相关链接
 
 - https:github.com/woow-wu7/7-vue2-source-code-analysis/blob/main/src/core/observer/watcher.js
