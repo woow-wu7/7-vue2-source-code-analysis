@@ -411,8 +411,8 @@ target.addEventListener(type, listener|具有handleEvent方法的对象[, useCap
     - provide/inject -------- 不是响应式的
     - context
     - vuex router
-    - $parent --------------- 父实例
-    - $children ------------- 当前实例的直接子组件 - 不能保证顺序，不是响应式
+    - $parent --------------- 父实例 - ( 例子:本项目/test-vue/test-$parent-$children.html )
+    - $children ------------- 当前实例的直接子组件(数组) - (数组中的直接子组件)不能保证顺序，不是响应式
 
 ### (14) 为什么大Vue不使用class而是使用构造函数呢？
 - 因为vue可以把不同的方法挂载原型链上，把实现代码单独抽离成文件，方便管理

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="../dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <div ref="father">
+        <child></child>
+      </div>
+    </div>
+    <script>
+      const child = Vue.component("child", {
+        template: `<div>child</div>`,
+        mounted() {
+          console.log("this.$parent", this.$parent); // 当前实例的父组件
+          console.log("this.$parent.a", this.$parent.a);
+        },
+        data() {
+          return {
+            a: 2,
+          };
+        },
+      });
+      new Vue({
+        el: "#app",
+        mounted() {
+          console.log("this", this);
+          console.log("this.$children", this.$children); // 当前实例的直接子组件数组，不是响应式，不能保证顺序
+          console.log("this.$children", this.$children);
+        },
+        data() {
+          return {
+            b: 2,
+          };
+        },
+        components: {
+          child,
+        },
+      });
+    </script>
+  </body>
+</html>
