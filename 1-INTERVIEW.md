@@ -179,7 +179,7 @@ Object.defineProperty 的缺点
 
 ### (7) diff算法
 - 分类：treeDiff componentDiff elementDiff
-- 总体：逐层比较
+- 总体：逐层比较，深度优先遍历
   - 1. 节点是组件，走 componentDiff
         - 判断组件类型是否一样，根据组件名称和组件类型判断
           - 类型一样，按原策略逐层比较
@@ -212,6 +212,9 @@ Object.defineProperty 的缺点
 - index作用为key的缺点：
   - 描述：比如当渲染list为3个input框，在每个input框中输入123，删除2，3的input框会变成2
   - 原因：因为删除2后，原来3的index变成了2，(key) 和 (css选择器input) 都没变，认为还是之前的2
+- 总结
+  - 在 静态列表 中，可以使用index作为key
+  - 再 动态列表 中，不能使用index作为key，原因如上
 - vue：本项目/test-vue/key/test-key.html
 - react：https://juejin.cn/post/7029703494877577246
 
@@ -404,8 +407,12 @@ target.addEventListener(type, listener|具有handleEvent方法的对象[, useCap
   - 问题：vue 传递数据的方式
   - 回答：
     - props $attrs $listeners
-    - provide/inject(不是响应式的) context
-    - vuex router vm.$emit
+    - vm.$emit
+    - provide/inject -------- 不是响应式的
+    - context
+    - vuex router
+    - $parent --------------- 父实例
+    - $children ------------- 当前实例的直接子组件 - 不能保证顺序，不是响应式
 
 ### (14) 为什么大Vue不使用class而是使用构造函数呢？
 - 因为vue可以把不同的方法挂载原型链上，把实现代码单独抽离成文件，方便管理
