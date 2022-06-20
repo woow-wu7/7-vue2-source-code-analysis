@@ -431,7 +431,7 @@ target.addEventListener(type, listener|具有handleEvent方法的对象[, useCap
 
 ### (17) vue如何在父组件中修改子组件的样式？
 - 关键词：
-  - ( deep ) ( >>> ) ( ::v-deep ) ( :deep(){} )
+  - ( /deep/ ) ( >>> ) ( ::v-deep ) ( :deep(){} )
   - scoped
 ```
 vue如何在父组件中修改子组件的样式？
@@ -445,7 +445,7 @@ vue如何在父组件中修改子组件的样式？
 (1) deep
 - 表现
   - css 是 >>>
-  - scss 是 deep
+  - scss 是 /deep/
   - scss 是 ::v-deep
   - scss 是 :deep(){}
 - 写法
