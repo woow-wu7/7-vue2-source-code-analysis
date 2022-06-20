@@ -429,6 +429,61 @@ target.addEventListener(type, listener|具有handleEvent方法的对象[, useCap
 - 案例
   - https://github.com/woow-wu7/4-joyo-lingjing-h5/blob/main/.env
 
+### (17) vue如何在父组件中修改子组件的样式？
+- 关键词：
+  - ( deep ) ( >>> ) ( ::v-deep ) ( :deep(){} )
+  - scoped
+```
+vue如何在父组件中修改子组件的样式？
+---
+1
+问题描述
+在vue组件中，父组件和子组件都加了scoped属性后，会在当前组件元素上添加 data-v-hash 属性，默认情况下 ( 子组件的最外层具有两个自定义属性，分别是 【父组件的data-v-hash父】 和 【子组件的data-v-hash子】；而子组件除了最外层以外都只有-子组件的data-v-hash子 )，所以在父组件中不能选中子组件中的除了根元素以外的元素
+
+
+---
+(1) deep
+- 表现
+  - css 是 >>>
+  - scss 是 deep
+  - scss 是 ::v-deep
+  - scss 是 :deep(){}
+- 写法
+  - 写法上一共有 4 种写法
+
+<!-- 写法1 使用::v-deep -->
+<style lang="scss" scoped>
+  ::v-deep .ant-card-head-title{
+    background: yellowgreen;
+  }
+</style>
+
+<!-- 写法2 使用>>> 操作符-->
+<style scoped>
+>>>.ant-card-head-title{
+  background: yellowgreen;
+}
+</style>
+
+<!-- 写法3 使用/deep/ -->
+<style scoped>
+ /deep/.ant-card-head-title{
+  background: yellowgreen;
+}
+</style>
+
+<!-- 写法4 使用:deep(<inner-selector>) -->
+<style lang="scss" scoped>
+  :deep(.ant-card-head-title){
+    background: yellowgreen;
+  }
+</style>
+
+
+---
+(2) 在vue文件中，使用不带 scope 的 style
+```
+
 # 相关链接
 
 - https:github.com/woow-wu7/7-vue2-source-code-analysis/blob/main/src/core/observer/watcher.js
