@@ -432,16 +432,22 @@ target.addEventListener(type, listener|具有handleEvent方法的对象[, useCap
 
 ### (17) vue如何在父组件中修改子组件的样式？
 - 关键词：
-  - ( /deep/ ) ( >>> ) ( ::v-deep ) ( :deep(){} )
+  - ( >>> ) ( /deep/ ) ( ::v-deep ) ( :deep(){} )
   - scoped
 ```
-vue如何在父组件中修改子组件的样式？
+vue中，当父子组件都添加了scoped时，如何在父组件中修改子组件的样式？
 ---
 1
 问题描述
-在vue组件中，父组件和子组件都加了scoped属性后，会在当前组件元素上添加 data-v-hash 属性，默认情况下 ( 子组件的最外层具有两个自定义属性，分别是 【父组件的data-v-hash父】 和 【子组件的data-v-hash子】；而子组件除了最外层以外都只有-子组件的data-v-hash子 )，所以在父组件中不能选中子组件中的除了根元素以外的元素
-
-
+- 因为
+  - 1. 在vue组件中style通过 ( scoped ) 可以在 ( 本组件的所有元素上添加 data-v-hash )
+  - 2. 当 父组件和子组件 都添加了scoped时
+    - 子组件的 ( 根元素 ) 上会有 ( 两个 ) data-v-hash，一个是自己的，一个是父组件的
+    - 子组件的 ( 其他元素 ) 上只有 ( 一个 ) data-v-hash，是自己的
+- 所以
+  - 在父子组件都添加了scoped时，父组件就不能通过 ( class类名 )，来选中 ( 子组件除了根元素以外的其他元素 )，因为 hash 不一样
+- 如何解决
+  - 通过 >>> /deep/ ::v-deep :deep() 来解决
 ---
 (1) deep
 - 表现
