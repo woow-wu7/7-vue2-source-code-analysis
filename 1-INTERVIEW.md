@@ -251,7 +251,8 @@ loading[data-v-ffa58c1c] {
 }
 ```
 
-### (10) v-if 和 v-for 的优先级
+### (10) vue2 中 v-if 和 v-for 的优先级
+- `注意：在vue3中修改了优先级顺序，v-if > v-for 了，所以在vue3中可以把 v-if 和 v-for 写在一起了`，
 - ( v-if,v-for ) 指令的处理发生在 ( 模版编译阶段 )
 - 优先级：当 v-if和v-for一起使用时，优先级 ( v-for > v-if )
 - 原因
