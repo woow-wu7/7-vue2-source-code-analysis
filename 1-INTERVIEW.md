@@ -430,7 +430,7 @@ target.addEventListener(type, listener|具有handleEvent方法的对象[, useCap
 - 案例
   - https://github.com/woow-wu7/4-joyo-lingjing-h5/blob/main/.env
 
-### (17) vue如何在父组件中修改子组件的样式？
+### (17) vue中，当父子组件都添加了scoped时，如何在父组件中修改子组件的样式？
 - 关键词：
   - ( >>> ) ( /deep/ ) ( ::v-deep ) ( :deep(){} )
   - scoped
