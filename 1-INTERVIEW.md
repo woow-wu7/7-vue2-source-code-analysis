@@ -178,7 +178,7 @@ Object.defineProperty 的缺点
   - src/core/components/keep-alive.js
 
 ### (7) diff算法
-- `总流程：el或template --> AST+optimize+generate --> render() --> vm.$update --> patch --> diff --> 生成真实的DOM`
+- `总流程：el或template --> AST+optimize+generate --> render() --> createElement生成vnode --> vm.$update --> patch --> diff --> 生成真实的DOM`
 - 分类：treeDiff componentDiff elementDiff
 - 总体：逐层比较，深度优先遍历
   - 1. 节点是组件，走 componentDiff
