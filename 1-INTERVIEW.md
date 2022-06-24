@@ -219,6 +219,7 @@ Object.defineProperty 的缺点
 - react：https://juejin.cn/post/7029703494877577246
 
 ### (9) vue style 标签中的 scoped 的作用
+- `结合 (17) 来一起看`
 - scoped
   - 是 html5 新增加的属性
   - 是一个 boolean 值，表示 ( 则样式仅仅应用到 style 元素的 - 父元素及其子元素 )
@@ -431,6 +432,7 @@ target.addEventListener(type, listener|具有handleEvent方法的对象[, useCap
   - https://github.com/woow-wu7/4-joyo-lingjing-h5/blob/main/.env
 
 ### (17) vue中，当父子组件都添加了scoped时，如何在父组件中修改子组件的样式？
+- `结合 (9) 来一起看`
 - 关键词：
   - ( >>> ) ( /deep/ ) ( ::v-deep ) ( :deep(){} )
   - scoped
