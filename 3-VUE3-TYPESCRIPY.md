@@ -12,6 +12,4 @@ vue add typescript
 
 (二) App.vue
 - App.vue 会被修改，我们需要改会原来的内容
-
-(三) 
 ```
