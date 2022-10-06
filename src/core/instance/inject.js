@@ -5,6 +5,9 @@ import { warn, hasSymbol } from "../util/index";
 import { defineReactive, toggleObserving } from "../observer/index";
 
 // provide 初始化
+// - 不保证响应式：provide 和 inject 并不保证响应式
+// - 解决响应式: 可以使用 computed 进行包装
+// - 官网说明: https://cn.vuejs.org/guide/components/provide-inject.html#working-with-reactivity
 export function initProvide(vm: Component) {
   const provide = vm.$options.provide;
   if (provide) {
