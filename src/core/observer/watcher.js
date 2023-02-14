@@ -200,6 +200,23 @@ export default class Watcher {
     //          - dirty=true，进行 watcher.evaluate() 执行computed的key对应的函数得到计算解结果
     //          - watcher.evaluate() 计算到结果后，又会将 dirty=false
     //          - 下次再访问到computed的key时，不会重新进行 watcher.evaluate() 的计算，而是直接返回之前计算好的结果，之前的值已经缓存在watcher.value中
+    // - computedWatcher 补充
+    // - 特点 ( 4 个特点 )
+    // - 1. computed 声明后，只有在 computed 被访问时才会去计算，( 比如在 template 模版中被访问，methods 中被访问 )
+    // - 2. computed 具有缓存功能，也就是说如果之前某个 computed 的 key 被访问过了，依赖的响应式数据没有变化，再次访问不会进行重新计算，而是直接返回之前计算好的值
+    // - 3. computed 的依赖必须是响应式数据，不然依赖变化后，也不会触发 computed 重新计算
+    // - 4. 即使 computed 的依赖变化了，但是 computed 计算的值并没有变化时，也不会重新渲染
+    // - 优点
+    // - 1. 对比模版中直接写逻辑
+    //   - 不推荐: 比如在模版中写了反转字符串的逻辑，组件中还有其他地方也需要反转，`<div> {{ message.split('').reverse().join('') }} </div>`
+    //   - 推荐: 以上不能复用逻辑，并且需要在模版中大量计算，并且缓存数据，computed 就能很好的解决
+    // - 2. 对比 方法
+    //   - 方法: 方法每次重渲染都会重新执行
+    //   - 计算属性: 当 依赖的响应式数据 没有变化时，重渲染是直接使用的缓存的值
+    // - 源码分析
+    // - [computed源码分析](https://juejin.cn/post/6844904184035147790)
+    // - [vue源码分析仓库](https://github.com/woow-wu7/7-vue2-source-code-analysis/blob/main/src/core/observer/watcher.js)
+    
     // 2. userWatcher
     //    - userWatcher <-> watch
     //    - watch对象的key对应的value的类型
@@ -224,7 +241,7 @@ export default class Watcher {
     const vm = this.vm
     try {
       value = this.getter.call(vm, vm)
-      // 执行getter()，传入vm作为参数，求值
+      // 执行 getter()，传入vm作为参数，求值
       // render Watcher 和 user watcher 都会执行 this.getter
 
       // render watcher 的 getter 是
